@@ -7,8 +7,35 @@ import {
   TransportError,
   UnauthorizedError,
   UncertifiedBlobError,
+  UnsupportedWalletSchemeError,
   ValidationError,
 } from "@arcadiasystems/morse-sdk";
+
+const UNSUPPORTED_SCHEME_COPY: Record<
+  UnsupportedWalletSchemeError["code"],
+  { title: string; body: string }
+> = {
+  "non-canonical-pubkey": {
+    title: "Wallet account format not recognized",
+    body: "This wallet returned a public key the SDK couldn't decode. Most common cause: Phantom on Sui returns an opaque pubkey. Try Slush or Suiet for a smooth flow.",
+  },
+  "malformed-zklogin": {
+    title: "zkLogin account is malformed",
+    body: "The zkLogin pubkey didn't decode cleanly. Reconnect or fall back to a keypair-backed wallet.",
+  },
+  "recovery-sig-length": {
+    title: "Wallet sent an unexpected signature length",
+    body: "The probe signature wasn't the expected 65 bytes. The wallet may not support Sui's signPersonalMessage format.",
+  },
+  "recovery-non-ed25519": {
+    title: "Recovery only supports Ed25519",
+    body: "The wallet's recovered key isn't Ed25519. Other schemes (Secp256k1, Passkey, etc.) need a wallet that returns a canonical Sui public key directly.",
+  },
+  "recovery-address-mismatch": {
+    title: "Wallet identity check failed",
+    body: "The recovered public key did not derive to the wallet's reported address. Reconnect, or try a different wallet.",
+  },
+};
 
 export type MappedError = {
   title: string;
@@ -208,6 +235,15 @@ export function mapSdkError(err: unknown): MappedError {
       title: "Upload finished, entry did not",
       body: `Your bytes are on Walrus (${err.blobId.slice(0, 12)}...) but the post wasn't attached. Retry to complete.`,
       severity: "warning",
+    };
+  }
+  if (err instanceof UnsupportedWalletSchemeError) {
+    const copy = UNSUPPORTED_SCHEME_COPY[err.code];
+    return {
+      title: copy.title,
+      body: copy.body,
+      severity: "error",
+      reason: err.code,
     };
   }
   if (err instanceof ConfigurationError) {

@@ -5,7 +5,7 @@
     "": {
       "name": "morse-blog-demo",
       "dependencies": {
-        "@arcadiasystems/morse-sdk": "0.1.2",
+        "@arcadiasystems/morse-sdk": "0.1.4",
         "@mysten/dapp-kit": "^1.0.6",
         "@mysten/seal": "1.1.3",
         "@mysten/sui": "2.16.2",
@@ -51,7 +51,7 @@
 
     "@alloc/quick-lru": ["@alloc/quick-lru@5.2.0", "", {}, "sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw=="],
 
-    "@arcadiasystems/morse-sdk": ["@arcadiasystems/morse-sdk@0.1.2", "", { "peerDependencies": { "@mysten/seal": ">=1.1.3 <1.2.0", "@mysten/sui": ">=2.16.2 <2.17.0", "@mysten/walrus": ">=1.1.6 <1.2.0" }, "optionalPeers": ["@mysten/seal", "@mysten/walrus"] }, "sha512-4YVLteyeyMxmWhb3FTP95Oyw3CGwxiFXOngX9lnysi001RkbUdNy5DEZBJs5gKqX42l2PPV6tYEDNxOpy0T8Cg=="],
+    "@arcadiasystems/morse-sdk": ["@arcadiasystems/morse-sdk@0.1.4", "", { "peerDependencies": { "@mysten/seal": ">=1.1.3 <1.2.0", "@mysten/sui": ">=2.16.2 <2.17.0", "@mysten/walrus": ">=1.1.6 <1.2.0" }, "optionalPeers": ["@mysten/seal", "@mysten/walrus"] }, "sha512-sY+s1titAIkIZxIDHr18+S6aVyXS4qZDiZYe4Qk2Fhmi24GS1r6iRr2Owa1S28/3/fGRADb72MF8Mq+I4eZshw=="],
 
     "@babel/code-frame": ["@babel/code-frame@7.29.0", "", { "dependencies": { "@babel/helper-validator-identifier": "^7.28.5", "js-tokens": "^4.0.0", "picocolors": "^1.1.1" } }, "sha512-9NhCeYjq9+3uxgdtp20LSiJXJvN0FeCtNGpJxuMFZ1Kv3cWUNb6DOhJwUvcVCzKGR66cw4njwM6hrJLqgOwbcw=="],
 
