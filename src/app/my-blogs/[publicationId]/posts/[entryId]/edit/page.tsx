@@ -315,7 +315,10 @@ export default function EditPostPage({
     const dr = entry.revisions[entry.draftHead];
     if (!dr) return;
     if (dr.blobRef.kind !== "blob") {
-      toast.error("Cannot publish quilt-backed drafts in this demo");
+      toast.error("Quilt-backed drafts not supported here", {
+        description:
+          "This demo only publishes single-blob revisions. The current draft references a Walrus quilt patch - use the SDK's quilt-aware publishFromDraft path directly to ship it.",
+      });
       return;
     }
     publishDraft.mutate(

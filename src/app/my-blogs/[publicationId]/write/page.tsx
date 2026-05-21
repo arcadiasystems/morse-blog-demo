@@ -106,7 +106,10 @@ export default function WritePostPage({
 
       // Anything else -> upload to media library and insert reference
       if (!cap.data) {
-        toast.error("Missing publisher cap");
+        toast.error("Missing publisher cap", {
+          description:
+            "Your wallet doesn't hold a PublisherCap on this publication, so the file can't be uploaded into media.",
+        });
         return;
       }
       await new Promise<void>((resolve) => {

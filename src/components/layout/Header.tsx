@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCurrentAccount } from "@mysten/dapp-kit";
-import { Radio } from "lucide-react";
+import { Ban, Radio } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { BalanceChips } from "@/components/layout/BalanceChips";
 import { WalletButton } from "@/components/layout/WalletButton";
 
@@ -27,10 +33,29 @@ export function Header() {
               morse<span className="text-primary">·</span>blog
             </span>
           </Link>
-          <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-primary">
-            <span className="size-1.5 rounded-full bg-primary animate-pulse" />
-            Testnet
-          </span>
+          <TooltipProvider delayDuration={150}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-primary cursor-default">
+                  <span className="size-1.5 rounded-full bg-primary animate-pulse" />
+                  Testnet
+                  <span
+                    aria-label="Mainnet disabled"
+                    title="Mainnet disabled"
+                    className="inline-flex items-center gap-0.5 text-muted-foreground/80 normal-case font-normal pl-1.5 ml-0.5 border-l border-primary/20"
+                  >
+                    <Ban className="size-2.5" />
+                    <span className="text-[10px]">mainnet off</span>
+                  </span>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-xs">
+                morse-sdk@0.1.x is testnet-only. Mainnet selection is
+                intentionally disabled in this demo - connect a wallet on
+                Sui Testnet for end-to-end flows to work.
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         <nav className="hidden md:flex items-center gap-1 ml-auto">

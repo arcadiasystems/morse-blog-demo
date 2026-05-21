@@ -55,9 +55,16 @@ export default function NewBlogPage() {
       { name: name.trim(), slug },
       {
         onSuccess: (result) => {
-          toast.success(`Publication created`, {
-            description: `${name.trim()} is live at /${slug}`,
-          });
+          if (result.defaultCollectionError) {
+            const mapped = mapSdkError(result.defaultCollectionError);
+            toast.warning("Publication created · default collection missing", {
+              description: `${mapped.title}: ${mapped.body} You can add a "posts" collection later from admin -> Settings.`,
+            });
+          } else {
+            toast.success(`Publication created`, {
+              description: `${name.trim()} is live at /${slug}`,
+            });
+          }
           router.push(`/my-blogs/${result.publicationId}`);
         },
         onError: (err) => {

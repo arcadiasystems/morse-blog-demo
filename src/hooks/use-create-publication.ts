@@ -23,6 +23,11 @@ export type CreatePublicationPhase =
   | "collection"
   | "done";
 
+export type CreatePublicationOutcome = CreatePublicationResult & {
+  /** Set if the default collection step failed after the publication landed. */
+  defaultCollectionError?: Error;
+};
+
 // Re-export so existing imports from this module keep working - but the
 // constant itself lives in `@/lib/morse-config` (server-safe).
 export { DEFAULT_COLLECTION_NAME } from "@/lib/morse-config";
@@ -33,7 +38,7 @@ export function useCreatePublication() {
   const [phase, setPhase] = useState<CreatePublicationPhase>("idle");
 
   const mutation = useMutation<
-    CreatePublicationResult,
+    CreatePublicationOutcome,
     Error,
     CreatePublicationInput
   >({
@@ -47,6 +52,7 @@ export function useCreatePublication() {
         slug: input.slug,
       });
       setPhase("collection");
+      let defaultCollectionError: Error | undefined;
       try {
         await createCollection(morse.adapter, morse.config, {
           publicationId: pub.publicationId,
@@ -56,11 +62,14 @@ export function useCreatePublication() {
         });
       } catch (err) {
         // The publication exists; the default collection didn't land. Surface
-        // a soft warning - user can still use the admin to create one.
+        // to the caller so the UI can show a warning toast - the user can
+        // still create the collection manually from admin -> Settings.
+        defaultCollectionError =
+          err instanceof Error ? err : new Error(String(err));
         console.warn("default collection create failed", err);
       }
       setPhase("done");
-      return pub;
+      return { ...pub, defaultCollectionError };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

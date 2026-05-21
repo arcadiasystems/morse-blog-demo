@@ -11,6 +11,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import "@mysten/dapp-kit/dist/index.css";
 
+// `mainnet` is listed so dapp-kit's network selector keeps the entry visible
+// for forward compatibility, but morse-sdk@0.1.x is testnet-only. The
+// MainnetBanner and the Testnet pill in Header make it explicit to users
+// that mainnet wallets won't work end-to-end. Remove this comment + ship
+// mainnet support once the morse contracts are deployed on mainnet.
 const { networkConfig } = createNetworkConfig({
   testnet: { url: getJsonRpcFullnodeUrl("testnet"), network: "testnet" },
   mainnet: { url: getJsonRpcFullnodeUrl("mainnet"), network: "mainnet" },

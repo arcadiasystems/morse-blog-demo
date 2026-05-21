@@ -72,6 +72,62 @@ const ABORT_REASON_COPY: Record<
   },
 };
 
+/**
+ * Friendlier copy for TransportError thrown by the SDK. `operation` (added in
+ * morse-sdk 0.1.2) is a stable discriminator like `sui.getObject`,
+ * `walrus.publisher.uploadBlob`, `walrus.aggregator.readBlob`, `seal.decrypt`,
+ * etc. Switch on its prefix to tell the user which layer wobbled instead of
+ * a generic "network hiccup".
+ */
+function mapTransportError(err: TransportError): MappedError {
+  const op = err.operation;
+  const baseBody = err.message
+    ? `${err.message}`
+    : "Couldn't reach the network. Check your connection and retry.";
+  const opTag = op ? ` (${op})` : "";
+
+  if (op?.startsWith("sui.")) {
+    return {
+      title: "Sui RPC hiccup",
+      body: `Sui network call failed${opTag}. ${baseBody}`,
+      severity: "error",
+    };
+  }
+  if (op?.startsWith("walrus.publisher.")) {
+    return {
+      title: "Walrus publisher unavailable",
+      body: `The publisher couldn't accept the upload${opTag}. Try again, or switch to a different publisher in src/lib/morse-config.ts.`,
+      severity: "error",
+    };
+  }
+  if (op?.startsWith("walrus.aggregator.")) {
+    return {
+      title: "Walrus aggregator unavailable",
+      body: `The aggregator couldn't return the blob${opTag}. Fresh blobs can take ~30s to propagate on testnet - retry shortly.`,
+      severity: "warning",
+    };
+  }
+  if (op?.startsWith("walrus.")) {
+    return {
+      title: "Walrus storage hiccup",
+      body: `Walrus call failed${opTag}. ${baseBody}`,
+      severity: "error",
+    };
+  }
+  if (op?.startsWith("seal.")) {
+    return {
+      title: "Seal call failed",
+      body: `${baseBody}${opTag}`,
+      severity: "error",
+    };
+  }
+  return {
+    title: "Network hiccup",
+    body: baseBody + opTag,
+    severity: "error",
+  };
+}
+
 const SEAL_COPY: Record<SealError["code"], { title: string; body: string }> = {
   "no-access": {
     title: "Locked",
@@ -162,11 +218,7 @@ export function mapSdkError(err: unknown): MappedError {
     };
   }
   if (err instanceof TransportError) {
-    return {
-      title: "Network hiccup",
-      body: "Couldn't reach the chain. Check your connection and retry.",
-      severity: "error",
-    };
+    return mapTransportError(err);
   }
   if (err instanceof MorseError) {
     return {

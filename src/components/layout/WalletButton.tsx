@@ -185,8 +185,20 @@ export function WalletButton({ size = "default", className }: Props) {
                             router.push("/my-blogs");
                           }
                         },
-                        onError: (err) =>
-                          toast.error(err.message || "Connection failed"),
+                        onError: (err) => {
+                          const msg = err?.message ?? "";
+                          const looksRejected = /reject|deni|cancel/i.test(msg);
+                          toast.error(
+                            looksRejected
+                              ? "Wallet connection rejected"
+                              : `Could not connect to ${wallet.name}`,
+                            {
+                              description: msg
+                                ? msg
+                                : "The wallet did not respond. Make sure it's unlocked and try again.",
+                            },
+                          );
+                        },
                       },
                     );
                   }}
