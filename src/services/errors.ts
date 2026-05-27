@@ -204,8 +204,8 @@ export function mapSdkError(err: unknown): MappedError {
   if (err instanceof NotFoundError) {
     if (err.resource === "blob") {
       return {
-        title: "Walrus blob not available yet",
-        body: "The aggregator does not have this blob. Wait ~30s for testnet propagation and retry, or the blob may have expired (storage epochs elapsed).",
+        title: "Walrus blob unavailable",
+        body: "The aggregator does not have this blob. If it was just uploaded, wait ~30s for testnet propagation and retry. Otherwise its storage lease has expired (Walrus blobs are not permanent) - open the post and re-save to restore it with a fresh blob.",
         severity: "warning",
       };
     }

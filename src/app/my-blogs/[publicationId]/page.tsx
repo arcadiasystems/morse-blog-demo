@@ -26,6 +26,7 @@ import { AdminHeader } from "@/components/blog/AdminHeader";
 import { CollectionSection } from "@/components/blog/CollectionSection";
 import { DangerZone } from "@/components/blog/DangerZone";
 import { EntryRow, classifyEntry } from "@/components/blog/EntryRow";
+import { hasPendingDraft } from "@/utils/entry-status";
 import { MediaTab } from "@/components/blog/MediaTab";
 import { MembersTab } from "@/components/blog/MembersTab";
 import { WalletButton } from "@/components/layout/WalletButton";
@@ -125,10 +126,14 @@ export default function PublicationAdminPage({
   const publication = query.data!;
   const publicEntries =
     entries.data?.filter((e) => classifyEntry(e) === "public") ?? [];
+  // Drafts tab = anything with unpublished work: pure drafts, premium
+  // (encrypted, draft-only by design), and published posts that have a
+  // newer unpublished draft revision.
   const draftEntries =
-    entries.data?.filter(
-      (e) => classifyEntry(e) === "draft" || classifyEntry(e) === "premium",
-    ) ?? [];
+    entries.data?.filter((e) => {
+      const s = classifyEntry(e);
+      return s === "draft" || s === "premium" || hasPendingDraft(e);
+    }) ?? [];
 
   return (
     <div className="flex flex-col gap-8 py-4 sm:py-8 max-w-4xl">
@@ -260,30 +265,32 @@ export default function PublicationAdminPage({
           )}
         </TabsContent>
 
-        <TabsContent value="drafts" className="mt-2">
-          {!hasPostsCollection ? (
+        <TabsContent value="drafts" className="flex flex-col gap-4 mt-2">
+          <div className="flex flex-col gap-0.5">
+            <h2 className="text-sm font-semibold">Drafts & premium</h2>
+            <p className="text-xs text-muted-foreground">
+              Posts with unpublished edits, plus premium (encrypted) posts -
+              which stay here permanently because encrypted entries have no
+              public-publish path.
+            </p>
+          </div>
+          {draftEntries.length === 0 ? (
             <EmptyState
               icon={<Pencil className="size-5" />}
-              title="No drafts yet"
-              description="Drafts show up once you save without publishing. Lands in Slice 5."
-            />
-          ) : draftEntries.length === 0 ? (
-            <EmptyState
-              icon={<Pencil className="size-5" />}
-              title="No drafts"
-              description="Posts saved as drafts (or premium-only) will appear here. Slice 5 wires the save-without-publish flow."
+              title="Nothing in drafts"
+              description="Save an edit without publishing, or write a premium (encrypted) post, and it'll show up here."
             />
           ) : (
             <ul className="flex flex-col gap-2">
               {draftEntries.map((entry) => (
                 <li key={entry.id}>
                   <EntryRow
-                entry={entry}
-                publicationId={publicationId}
-                collectionName={DEFAULT_COLLECTION_NAME}
-                onDelete={handleDelete}
-                deleting={deletePost.isPending}
-              />
+                    entry={entry}
+                    publicationId={publicationId}
+                    collectionName={DEFAULT_COLLECTION_NAME}
+                    onDelete={handleDelete}
+                    deleting={deletePost.isPending}
+                  />
                 </li>
               ))}
             </ul>

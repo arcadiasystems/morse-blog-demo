@@ -11,6 +11,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMorse } from "@/hooks/use-morse";
 import { entriesKey } from "@/hooks/use-entries";
 import { DEFAULT_COLLECTION_NAME } from "@/hooks/use-create-publication";
+import { WALRUS_STORAGE_EPOCHS } from "@/lib/morse-config";
 
 export type WritePostPhase =
   | "idle"
@@ -41,7 +42,7 @@ export function useWritePublicPost() {
 
       setPhase("uploading-walrus");
       const blob = await morse.walrusWrite.uploadBlob(bytes, {
-        epochs: 3,
+        epochs: WALRUS_STORAGE_EPOCHS,
         deletable: true,
       });
 

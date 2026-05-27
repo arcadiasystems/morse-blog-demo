@@ -5,9 +5,11 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
+  Eye,
   FileUp,
   Lock,
   Loader2,
+  Pencil,
   Send,
   TriangleAlert,
 } from "lucide-react";
@@ -31,17 +33,16 @@ import { Field } from "@/components/forms/Field";
 import { FormShell } from "@/components/forms/FormShell";
 import { ContentPicker } from "@/components/blog/ContentPicker";
 import { MarkdownEditor } from "@/components/blog/MarkdownEditor";
+import { MarkdownRenderer } from "@/components/blog/MarkdownRenderer";
 import { MediaPicker } from "@/components/blog/MediaPicker";
 import { WalletButton } from "@/components/layout/WalletButton";
 import {
   MEDIA_COLLECTION_NAME,
-  walrusObjectUrl,
+  WALRUS_STORAGE_EPOCHS,
 } from "@/lib/morse-config";
 import { DEFAULT_COLLECTION_NAME } from "@/hooks/use-create-publication";
-import { useMorse } from "@/hooks/use-morse";
 import { usePublication } from "@/hooks/use-publication";
 import { usePublisherCap } from "@/hooks/use-publisher-cap";
-import { useUploadMedia } from "@/hooks/use-upload-media";
 import { useWritePublicPost } from "@/hooks/use-write-post";
 import { useWriteEncryptedPost } from "@/hooks/use-write-encrypted-post";
 import { mapSdkError } from "@/services/errors";
@@ -60,40 +61,37 @@ export default function WritePostPage({
   const collectionName =
     searchParams.get("collection") || DEFAULT_COLLECTION_NAME;
 
-  const morse = useMorse();
   const publication = usePublication(publicationId);
   const cap = usePublisherCap(publicationId);
   const writePublic = useWritePublicPost();
   const writeEncrypted = useWriteEncryptedPost();
-  const uploadMedia = useUploadMedia();
 
   const [title, setTitle] = useState("");
   const [markdown, setMarkdown] = useState("");
   const [dragging, setDragging] = useState(false);
   const [premium, setPremium] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
 
   const hasMediaCollection =
     publication.data?.collections.some(
       (c) => c.name === MEDIA_COLLECTION_NAME,
     ) ?? false;
-  const aggregatorUrl = morse?.config.walrusEndpoints.aggregator ?? "";
 
   const handleFile = useCallback(
     async (file: File): Promise<void> => {
-      if (file.size > MAX_FILE_BYTES) {
-        toast.warning("File is large for testnet", {
-          description: `${(file.size / 1024 / 1024).toFixed(1)} MB exceeds the ~5 MB soft cap. Uploads may fail.`,
-        });
-      }
-
       const isTextLike =
         file.type.startsWith("text/") ||
         file.name.endsWith(".md") ||
         file.name.endsWith(".markdown") ||
         file.name.endsWith(".txt");
 
-      // Plain text / markdown -> load into the editor body
+      // Plain text / markdown -> load into the editor body.
       if (isTextLike) {
+        if (file.size > MAX_FILE_BYTES) {
+          toast.warning("File is large for testnet", {
+            description: `${(file.size / 1024 / 1024).toFixed(1)} MB exceeds the ~5 MB soft cap.`,
+          });
+        }
         const text = await file.text();
         setMarkdown(text);
         if (!title.trim()) {
@@ -104,63 +102,15 @@ export default function WritePostPage({
         return;
       }
 
-      // Anything else -> upload to media library and insert reference
-      if (!cap.data) {
-        toast.error("Missing publisher cap", {
-          description:
-            "Your wallet doesn't hold a PublisherCap on this publication, so the file can't be uploaded into media.",
-        });
-        return;
-      }
-      await new Promise<void>((resolve) => {
-        uploadMedia.mutate(
-          {
-            publicationId,
-            publisherCapId: cap.data!.id,
-            hasMediaCollection,
-            file,
-          },
-          {
-            onSuccess: (result) => {
-              const url = walrusObjectUrl(
-                aggregatorUrl,
-                result.blobObjectId as unknown as string,
-              );
-              const isImage = file.type.startsWith("image/");
-              const safeAlt = file.name.replace(/[\[\]]/g, "");
-              const ref = isImage
-                ? `![${safeAlt}](${url})`
-                : `[${safeAlt}](${url})`;
-              setMarkdown((prev) => {
-                const sep = prev.length === 0
-                  ? ""
-                  : prev.endsWith("\n\n")
-                    ? ""
-                    : prev.endsWith("\n")
-                      ? "\n"
-                      : "\n\n";
-                return `${prev}${sep}${ref}\n`;
-              });
-              toast.success(`Uploaded and inserted ${file.name}`);
-              resolve();
-            },
-            onError: (err) => {
-              const m = mapSdkError(err);
-              toast.error(m.title, { description: m.body });
-              resolve();
-            },
-          },
-        );
+      // Images / binaries are NOT auto-uploaded from the editor. We funnel
+      // them through the Insert image dialog so the upload + insert is an
+      // explicit, understandable step (and so users learn where media lives).
+      toast.info("Use “Insert image” to add an image", {
+        description:
+          "Images upload to your media library on Walrus. Click the Insert image button above to upload + insert (or pick one you already uploaded).",
       });
     },
-    [
-      cap.data,
-      publicationId,
-      hasMediaCollection,
-      uploadMedia,
-      aggregatorUrl,
-      title,
-    ],
+    [title],
   );
 
   const onDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
@@ -296,11 +246,19 @@ export default function WritePostPage({
 
       <Alert className="bg-card/40 border-border/60">
         <TriangleAlert className="size-4" />
-        <AlertTitle className="text-sm">Walrus testnet limits</AlertTitle>
+        <AlertTitle className="text-sm">
+          Walrus storage is temporary
+        </AlertTitle>
         <AlertDescription className="text-xs text-muted-foreground">
-          Keep posts under ~5 MB for reliable testnet uploads. Publisher
-          operators may rate-limit large or frequent submissions. Mainnet
-          supports larger payloads with appropriate WAL.
+          This post&apos;s body is stored on Walrus for{" "}
+          <span className="text-foreground font-medium">
+            {WALRUS_STORAGE_EPOCHS} epochs
+          </span>{" "}
+          (~{WALRUS_STORAGE_EPOCHS} days on testnet). After that the storage
+          lease expires and the content is removed - blobs are not permanent.
+          This demo uses a fixed duration to keep things simple; a real app
+          would let you choose how long to store each post (longer costs more
+          WAL). Also keep posts under ~5 MB for reliable testnet uploads.
         </AlertDescription>
       </Alert>
 
@@ -363,6 +321,25 @@ export default function WritePostPage({
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <Label className="text-sm font-medium">Content</Label>
             <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                type="button"
+                variant={previewing ? "default" : "outline"}
+                size="sm"
+                className="gap-1.5"
+                onClick={() => setPreviewing((p) => !p)}
+              >
+                {previewing ? (
+                  <>
+                    <Pencil className="size-3.5" />
+                    Edit
+                  </>
+                ) : (
+                  <>
+                    <Eye className="size-3.5" />
+                    Preview
+                  </>
+                )}
+              </Button>
               <MediaPicker
                 publicationId={publicationId}
                 hasMediaCollection={hasMediaCollection}
@@ -425,34 +402,45 @@ export default function WritePostPage({
               </label>
             </div>
           </div>
-          <div
-            onDragOver={onDragOver}
-            onDragLeave={onDragLeave}
-            onDrop={onDrop}
-            className={`relative rounded-lg transition-all ${
-              dragging
-                ? "ring-2 ring-primary ring-offset-2 ring-offset-background"
-                : ""
-            }`}
-          >
-            {dragging ? (
-              <div className="absolute inset-0 z-20 grid place-items-center rounded-lg bg-primary/10 backdrop-blur-sm pointer-events-none">
-                <div className="flex flex-col items-center gap-2 text-primary">
-                  <FileUp className="size-6" />
-                  <p className="text-sm font-medium">Drop to upload</p>
-                  <p className="text-xs text-muted-foreground">
-                    text replaces the body · images and files upload to media
-                  </p>
+          {previewing ? (
+            <div className="rounded-lg border border-border/60 bg-card/30 px-5 py-4 min-h-[300px]">
+              {markdown.trim().length > 0 ? (
+                <MarkdownRenderer source={markdown} />
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Nothing to preview yet. Switch to Edit and write something.
+                </p>
+              )}
+            </div>
+          ) : (
+            <div
+              onDragOver={onDragOver}
+              onDragLeave={onDragLeave}
+              onDrop={onDrop}
+              className={`relative rounded-lg transition-all ${
+                dragging
+                  ? "ring-2 ring-primary ring-offset-2 ring-offset-background"
+                  : ""
+              }`}
+            >
+              {dragging ? (
+                <div className="absolute inset-0 z-20 grid place-items-center rounded-lg bg-primary/10 backdrop-blur-sm pointer-events-none">
+                  <div className="flex flex-col items-center gap-2 text-primary">
+                    <FileUp className="size-6" />
+                    <p className="text-sm font-medium">Drop a .md / .txt file</p>
+                    <p className="text-xs text-muted-foreground">
+                      replaces the body · images go through Insert image
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ) : null}
-            <MarkdownEditor value={markdown} onChange={setMarkdown} />
-          </div>
+              ) : null}
+              <MarkdownEditor value={markdown} onChange={setMarkdown} />
+            </div>
+          )}
           <p className="text-xs text-muted-foreground">
-            Drop any file on the editor. <code>.md</code> / <code>.txt</code>{" "}
-            replaces the body; images and other binaries upload to the{" "}
-            <code className="font-mono">{MEDIA_COLLECTION_NAME}</code>{" "}
-            collection on Walrus and insert a reference at the bottom.
+            {previewing
+              ? "This is exactly how the body renders on the public post page (same Markdown renderer)."
+              : "Drop a .md or .txt file here to replace the body. To add an image, use the Insert image button so it uploads to your media library first."}
           </p>
         </div>
       </FormShell>

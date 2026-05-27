@@ -1,13 +1,18 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import {
   SuiClientProvider,
   WalletProvider,
   createNetworkConfig,
+  useCurrentAccount,
 } from "@mysten/dapp-kit";
 import { getJsonRpcFullnodeUrl } from "@mysten/sui/jsonRpc";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import "@mysten/dapp-kit/dist/index.css";
 
@@ -39,10 +44,37 @@ export function Providers({ children }: { children: ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <SuiClientProvider networks={networkConfig} defaultNetwork="testnet">
         <WalletProvider autoConnect>
+          <WalletCacheReset />
           {children}
           <Toaster position="bottom-right" richColors theme="dark" />
         </WalletProvider>
       </SuiClientProvider>
     </QueryClientProvider>
   );
+}
+
+/**
+ * Drops all cached query data when the wallet disconnects or switches, so a
+ * fresh connection never renders the previous wallet's blogs/balances. Without
+ * this, TanStack keeps prior-address results in memory; on reconnect they'd
+ * flash before the new fetch settles. (Per-address query keys prevent wrong
+ * data being shown long-term, but clearing on transition kills the flash.)
+ */
+function WalletCacheReset() {
+  const account = useCurrentAccount();
+  const queryClient = useQueryClient();
+  const prevAddress = useRef<string | null>(null);
+
+  useEffect(() => {
+    const current = account?.address ?? null;
+    const previous = prevAddress.current;
+    // Clear only on a real transition away from a connected wallet
+    // (disconnect or switch), not on the initial null -> address connect.
+    if (previous !== null && previous !== current) {
+      queryClient.clear();
+    }
+    prevAddress.current = current;
+  }, [account?.address, queryClient]);
+
+  return null;
 }

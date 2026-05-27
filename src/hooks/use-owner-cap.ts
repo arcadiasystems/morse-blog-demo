@@ -5,12 +5,12 @@ import {
   toSuiAddress,
   type OwnerCapId,
 } from "@arcadiasystems/morse-sdk";
-import { useMorse } from "@/hooks/use-morse";
+import { useMorseReader } from "@/hooks/use-morse-reader";
 
 export const ownerCapKey = (
-  address: string | undefined,
+  address: string | null | undefined,
   publicationId: string,
-) => ["owner-cap", address, publicationId];
+) => ["owner-cap", address ?? null, publicationId];
 
 /**
  * Returns the connected wallet's OwnerCap id for a given publication, or
@@ -18,15 +18,14 @@ export const ownerCapKey = (
  * listPublicationsOwnedBy and filters - no separate index.
  */
 export function useOwnerCap(publicationId: string | undefined) {
-  const morse = useMorse();
-  const address = morse?.account?.address;
+  const { reader, address } = useMorseReader();
 
   return useQuery<OwnerCapId | null>({
     queryKey: ownerCapKey(address, publicationId ?? ""),
     queryFn: async ({ signal }) => {
-      if (!morse || !publicationId) return null;
-      const page = await morse.reader.listPublicationsOwnedBy(
-        toSuiAddress(morse.account!.address),
+      if (!address || !publicationId) return null;
+      const page = await reader.listPublicationsOwnedBy(
+        toSuiAddress(address),
         { signal },
       );
       const match = page.results.find(
@@ -34,7 +33,7 @@ export function useOwnerCap(publicationId: string | undefined) {
       );
       return match?.ownerCapId ?? null;
     },
-    enabled: Boolean(morse && publicationId),
+    enabled: Boolean(address && publicationId),
     staleTime: 60_000,
   });
 }

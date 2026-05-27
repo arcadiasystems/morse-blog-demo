@@ -2,11 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 import {
+  NotFoundError,
   toPublicationId,
   type Entry,
 } from "@arcadiasystems/morse-sdk";
-import { useMorse } from "@/hooks/use-morse";
-import { DEFAULT_COLLECTION_NAME } from "@/hooks/use-create-publication";
+import { useMorseReader } from "@/hooks/use-morse-reader";
+import { DEFAULT_COLLECTION_NAME } from "@/lib/morse-config";
 
 export const entryContentKey = (
   publicationId: string,
@@ -22,6 +23,12 @@ export type EntryWithContent = {
   contentType: string;
   /** Which head we sourced the content from. */
   source: "draftHead" | "publicHead" | "empty";
+  /**
+   * True when the on-chain entry exists but its Walrus blob is gone (storage
+   * lease expired or testnet wiped). The entry metadata is still valid; the
+   * body bytes are unrecoverable and the post must be re-saved to heal it.
+   */
+  blobMissing: boolean;
 };
 
 const DECODER = new TextDecoder();
@@ -38,15 +45,15 @@ function isTextContentType(contentType: string): boolean {
  * Fetches the entry and resolves the editor pre-fill content from Walrus.
  *
  * Source-of-truth priority: draftHead first (in-progress edits), then
- * publicHead. Encrypted revisions return empty content; the edit page should
- * route premium-post editing to the Seal flow (Slice 6) before calling this.
+ * publicHead. Encrypted revisions return empty content; the edit page routes
+ * premium-post editing through the Seal decrypt flow before calling this.
  */
 export function useEntryContent(
   publicationId: string | undefined,
   entryId: number | undefined,
   collectionName: string = DEFAULT_COLLECTION_NAME,
 ) {
-  const morse = useMorse();
+  const { reader, walrusRead } = useMorseReader();
 
   return useQuery<EntryWithContent>({
     queryKey: entryContentKey(
@@ -55,12 +62,11 @@ export function useEntryContent(
       entryId ?? -1,
     ),
     queryFn: async ({ signal }) => {
-      if (!morse) throw new Error("Wallet not connected");
       if (!publicationId || entryId === undefined) {
         throw new Error("Missing publication / entry id");
       }
 
-      const entry = await morse.reader.getEntry(
+      const entry = await reader.getEntry(
         toPublicationId(publicationId),
         collectionName,
         entryId,
@@ -75,7 +81,13 @@ export function useEntryContent(
             : null;
 
       if (!head) {
-        return { entry, content: "", contentType: "text/markdown", source: "empty" };
+        return {
+          entry,
+          content: "",
+          contentType: "text/markdown",
+          source: "empty",
+          blobMissing: false,
+        };
       }
 
       const revision = entry.revisions[head.idx];
@@ -85,6 +97,7 @@ export function useEntryContent(
           content: "",
           contentType: revision?.contentType ?? "text/markdown",
           source: head.source,
+          blobMissing: false,
         };
       }
 
@@ -97,20 +110,36 @@ export function useEntryContent(
           content: null,
           contentType: revision.contentType,
           source: head.source,
+          blobMissing: false,
         };
       }
 
-      // Text path: fetch bytes and UTF-8 decode. Errors surface to the
-      // query so the UI shows them instead of silently pre-filling with "".
-      const bytes = await morse.walrusRead.readBlobRef(revision.blobRef);
-      return {
-        entry,
-        content: DECODER.decode(bytes),
-        contentType: revision.contentType,
-        source: head.source,
-      };
+      // Text path: fetch bytes and UTF-8 decode. A missing blob (expired
+      // storage lease / testnet wipe) is NOT a hard error - we still return
+      // the entry so the editor can offer a re-save instead of a dead end.
+      try {
+        const bytes = await walrusRead.readBlobRef(revision.blobRef);
+        return {
+          entry,
+          content: DECODER.decode(bytes),
+          contentType: revision.contentType,
+          source: head.source,
+          blobMissing: false,
+        };
+      } catch (err) {
+        if (err instanceof NotFoundError && err.resource === "blob") {
+          return {
+            entry,
+            content: null,
+            contentType: revision.contentType,
+            source: head.source,
+            blobMissing: true,
+          };
+        }
+        throw err;
+      }
     },
-    enabled: Boolean(morse && publicationId && entryId !== undefined),
+    enabled: Boolean(publicationId && entryId !== undefined),
     staleTime: 5_000,
   });
 }

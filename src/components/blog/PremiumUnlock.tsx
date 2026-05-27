@@ -45,7 +45,7 @@ export function PremiumUnlock({
       <EmptyState
         icon={<Lock className="size-5" />}
         title="Connect to unlock"
-        description="This is an encrypted post. Connect a wallet that holds a publisher cap on this publication to decrypt and read."
+        description="This is an encrypted post. Connect a wallet that holds a publisher cap on this blog to decrypt and read."
         action={<WalletButton size="lg" />}
       />
     );
@@ -67,7 +67,7 @@ export function PremiumUnlock({
       <EmptyState
         icon={<Lock className="size-5" />}
         title="Entry not found"
-        description="This entry may have been deleted or the publication ID is wrong."
+        description="This entry may have been deleted or the blog ID is wrong."
       />
     );
   }
@@ -77,7 +77,7 @@ export function PremiumUnlock({
       <EmptyState
         icon={<Lock className="size-5" />}
         title="No access"
-        description="Your wallet does not hold a publisher cap on this publication. The blog owner can issue you one to grant decryption access."
+        description="Your wallet does not hold a publisher cap on this blog. The blog owner can issue you one to grant decryption access."
       />
     );
   }

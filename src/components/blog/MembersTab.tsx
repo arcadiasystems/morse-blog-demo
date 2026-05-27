@@ -93,7 +93,7 @@ export function MembersTab({ publicationId }: { publicationId: string }) {
       <EmptyState
         icon={<Users className="size-5" />}
         title="Only the owner can manage members"
-        description="The OwnerCap for this publication is not in your wallet. Connect with the owner wallet to issue, revoke, or transfer caps."
+        description="The owner cap for this blog is not in your wallet. Connect with the owner wallet to issue, revoke, or transfer caps."
       />
     );
   }

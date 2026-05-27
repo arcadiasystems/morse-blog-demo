@@ -5,12 +5,12 @@ import {
   toSuiAddress,
   type PublisherCap,
 } from "@arcadiasystems/morse-sdk";
-import { useMorse } from "@/hooks/use-morse";
+import { useMorseReader } from "@/hooks/use-morse-reader";
 
 export const publisherCapKey = (
-  address: string | undefined,
+  address: string | null | undefined,
   publicationId: string,
-) => ["publisher-cap", address, publicationId];
+) => ["publisher-cap", address ?? null, publicationId];
 
 /**
  * Resolves the user's PublisherCap for a given publication, if any. Returns
@@ -18,15 +18,14 @@ export const publisherCapKey = (
  * but for a single-author demo there's only one).
  */
 export function usePublisherCap(publicationId: string | undefined) {
-  const morse = useMorse();
-  const address = morse?.account?.address;
+  const { reader, address } = useMorseReader();
 
   return useQuery<PublisherCap | null>({
     queryKey: publisherCapKey(address, publicationId ?? ""),
     queryFn: async ({ signal }) => {
-      if (!morse || !publicationId) return null;
-      const page = await morse.reader.listPublisherCapsOwnedBy(
-        toSuiAddress(morse.account!.address),
+      if (!address || !publicationId) return null;
+      const page = await reader.listPublisherCapsOwnedBy(
+        toSuiAddress(address),
         { signal },
       );
       const match = page.results.find(
@@ -34,7 +33,7 @@ export function usePublisherCap(publicationId: string | undefined) {
       );
       return match ?? null;
     },
-    enabled: Boolean(morse && publicationId),
+    enabled: Boolean(address && publicationId),
     staleTime: 30_000,
   });
 }

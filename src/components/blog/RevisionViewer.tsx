@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { Copy, FileText, Lock, X } from "lucide-react";
 import { toast } from "sonner";
-import type { Entry, Revision } from "@arcadiasystems/morse-sdk";
+import {
+  NotFoundError,
+  type Entry,
+  type Revision,
+} from "@arcadiasystems/morse-sdk";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MarkdownRenderer } from "@/components/blog/MarkdownRenderer";
 import { WalrusImage } from "@/components/blog/WalrusImage";
 import { useMorse } from "@/hooks/use-morse";
+import { mapSdkError } from "@/services/errors";
 import { truncateAddress } from "@/utils/address";
 
 type Props = {
@@ -165,9 +170,18 @@ export function RevisionViewer({
               <Skeleton className="h-4 w-4/6" />
             </div>
           ) : error ? (
-            <div className="rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-6 text-sm text-muted-foreground text-center">
-              Could not load this revision&apos;s body from Walrus:{" "}
-              {error.message}
+            <div className="rounded-lg border border-amber-400/40 bg-amber-400/5 px-4 py-6 text-sm text-muted-foreground text-center">
+              {(() => {
+                const m = mapSdkError(error);
+                return (
+                  <>
+                    <span className="block text-foreground font-medium mb-1">
+                      {m.title}
+                    </span>
+                    {m.body}
+                  </>
+                );
+              })()}
             </div>
           ) : (
             <MarkdownRenderer source={text ?? ""} />
@@ -177,8 +191,9 @@ export function RevisionViewer({
         <div className="mt-4 flex items-center justify-between gap-3 pt-3 border-t border-border/60">
           <p className="text-[11px] text-muted-foreground">
             <FileText className="size-3 inline -mt-0.5 mr-1" />
-            Revisions are immutable. To &ldquo;rollback&rdquo;, copy this
-            content into the editor and save as a new draft.
+            {error instanceof NotFoundError && error.resource === "blob"
+              ? "This revision's content has expired on Walrus and can't be recovered. Re-write the post from the editor to create a fresh version."
+              : "Revisions are immutable. To “rollback”, copy this content into the editor and save as a new draft."}
           </p>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={onClose}>

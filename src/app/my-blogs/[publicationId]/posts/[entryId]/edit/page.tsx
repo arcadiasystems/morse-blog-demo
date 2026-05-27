@@ -14,6 +14,7 @@ import {
   FileUp,
   Loader2,
   Lock,
+  Pencil,
   Save,
   Send,
   Trash2,
@@ -54,6 +55,7 @@ import { WalrusImage } from "@/components/blog/WalrusImage";
 import { WalletButton } from "@/components/layout/WalletButton";
 import { MEDIA_COLLECTION_NAME } from "@/lib/morse-config";
 import { DEFAULT_COLLECTION_NAME } from "@/hooks/use-create-publication";
+import { hasPendingDraft } from "@/utils/entry-status";
 import { useEntryContent } from "@/hooks/use-entry-content";
 import { usePublication } from "@/hooks/use-publication";
 import { usePublisherCap } from "@/hooks/use-publisher-cap";
@@ -109,6 +111,7 @@ export default function EditPostPage({
   const [originalContent, setOriginalContent] = useState("");
   const [dragging, setDragging] = useState(false);
   const [decrypted, setDecrypted] = useState(false);
+  const [rewriting, setRewriting] = useState(false);
 
   const entry = content.data?.entry;
   const draftRev =
@@ -118,7 +121,12 @@ export default function EditPostPage({
     entry && entry.publicHead !== null
       ? entry.revisions[entry.publicHead]
       : draftRev;
-  const isBinaryEntry = content.data?.content === null && !isPremium;
+  const blobMissing = content.data?.blobMissing ?? false;
+  // A missing blob also reports content === null, but it's a text entry whose
+  // bytes expired - route it to the editor (with a recovery notice), not the
+  // binary preview.
+  const isBinaryEntry =
+    content.data?.content === null && !isPremium && !blobMissing;
   const entryContentType = content.data?.contentType ?? "text/markdown";
   const isImageEntry = isBinaryEntry && entryContentType.startsWith("image/");
 
@@ -152,7 +160,10 @@ export default function EditPostPage({
       file.name.endsWith(".markdown") ||
       file.name.endsWith(".txt");
     if (!isTextLike) {
-      toast.error("Only markdown / text files supported");
+      toast.info("Use “Insert image” to add an image", {
+        description:
+          "Only .md / .txt files can be dropped here. To add an image, use the Insert image button so it uploads to your media library.",
+      });
       return;
     }
     const text = await file.text();
@@ -225,14 +236,18 @@ export default function EditPostPage({
     );
   }
 
-  const hasDraftHead = entry.draftHead !== null;
+  // A draft is publishable only when it's newer than the public head.
+  // After publishFromDraft the SDK leaves draftHead pointing at the old
+  // (now-published) draft, so `draftHead !== publicHead` would wrongly keep
+  // the publish button live. hasPendingDraft compares recency correctly.
+  const pendingDraft = hasPendingDraft(entry);
   const isDirty = markdown !== originalContent;
   const isSavingPublic = saveDraft.isPending;
   const isSavingEncrypted = saveEncryptedDraft.isPending;
   const isSaving = isSavingPublic || isSavingEncrypted;
   const canSave = isDirty && !isSaving && (!isPremium || decrypted);
   const canPublish =
-    hasDraftHead && !publishDraft.isPending && !isSaving && !isPremium;
+    pendingDraft && !publishDraft.isPending && !isSaving && !isPremium;
 
   async function onUnlock() {
     if (!cap.data || !entry) return;
@@ -371,6 +386,96 @@ export default function EditPostPage({
     ? saveEncryptedDraft.phase
     : saveDraft.phase;
 
+  // Expired blob, before the user opts to re-write: don't drop them into an
+  // empty editor (the original is unrecoverable, so there's nothing to
+  // "restore"). Offer the two honest choices - re-write or delete.
+  if (blobMissing && !rewriting) {
+    return (
+      <div className="flex flex-col gap-6 py-4 sm:py-8 max-w-3xl">
+        <BackLink publicationId={publicationId} />
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge variant="outline" className="font-mono border-border/60">
+              #{entry.id}
+            </Badge>
+            {entry.publicHead !== null ? (
+              <Badge
+                variant="outline"
+                className="border-primary/40 bg-primary/10 text-primary"
+              >
+                Published
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="border-border/70">
+                Unpublished
+              </Badge>
+            )}
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {entry.name || `Entry #${entry.id}`}
+          </h1>
+        </div>
+
+        <div className="flex flex-col items-center gap-5 rounded-xl border border-amber-400/30 bg-amber-400/5 px-6 py-12 text-center">
+          <div className="grid place-items-center size-12 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/40">
+            <TriangleAlert className="size-5" />
+          </div>
+          <div className="flex flex-col gap-2 max-w-md">
+            <h2 className="text-lg font-semibold">
+              Content no longer available
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              This post&apos;s body was stored on Walrus for a fixed number of
+              epochs, and that storage lease has expired. The bytes are gone and
+              the original text cannot be recovered. The on-chain entry and its
+              title are still intact.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              You can re-write the post (new content is stored for ~50 epochs)
+              or delete it to clean up.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button onClick={() => setRewriting(true)} className="gap-2">
+              <Pencil className="size-4" />
+              Re-write post
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/40"
+                  disabled={deletePost.isPending}
+                >
+                  <Trash2 className="size-4" />
+                  Delete post
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete this post?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    The entry will be removed from the publication. This is
+                    irreversible.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={onDelete}
+                    className="bg-destructive text-white hover:bg-destructive/90"
+                  >
+                    Delete permanently
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6 py-4 sm:py-8 max-w-5xl">
       <BackLink publicationId={publicationId} />
@@ -399,9 +504,7 @@ export default function EditPostPage({
               Unpublished
             </Badge>
           )}
-          {!isPremium &&
-          hasDraftHead &&
-          entry.draftHead !== entry.publicHead ? (
+          {!isPremium && pendingDraft ? (
             <Badge
               variant="outline"
               className="border-amber-400/40 bg-amber-400/10 text-amber-300"
@@ -414,22 +517,54 @@ export default function EditPostPage({
           {entry.name || `Entry #${entry.id}`}
         </h1>
         <p className="text-sm text-muted-foreground">
-          {isPremium
-            ? "Premium posts are encrypted client-side. The current draft is the visible version - no separate publish step."
-            : isBinaryEntry
-              ? `Binary entry (${entryContentType}). Body is a file, not markdown - preview below. Delete to replace, since names are immutable.`
-              : "Title is immutable once the entry is created. Edit the body below and save a draft, then publish to make the new revision public."}
+          {blobMissing
+            ? "Re-writing this post from scratch - the original body expired on Walrus and is unrecoverable. New content is stored for ~50 epochs."
+            : isPremium
+              ? "Premium posts are encrypted client-side. The current draft is the visible version - no separate publish step."
+              : isBinaryEntry
+                ? `Binary entry (${entryContentType}). Body is a file, not markdown - preview below. Delete to replace, since names are immutable.`
+                : "Title is immutable once the entry is created. Edit the body below and save a draft, then publish to make the new revision public."}
         </p>
       </div>
 
-      <Alert className="bg-card/40 border-border/60">
-        <TriangleAlert className="size-4" />
-        <AlertTitle className="text-sm">Append-only revisions</AlertTitle>
+      {blobMissing ? (
+        <Alert className="bg-amber-400/5 border-amber-400/40">
+          <TriangleAlert className="size-4 text-amber-300" />
+          <AlertTitle className="text-sm">
+            Re-authoring expired content
+          </AlertTitle>
+          <AlertDescription className="text-xs text-muted-foreground">
+            The original body is gone from Walrus and cannot be recovered - this
+            is a fresh write. Type the content, then{" "}
+            <span className="text-foreground font-medium">Save draft</span> and
+            Publish to replace the dead revision with a new blob stored for ~50
+            epochs.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      <Alert
+        className={
+          isPremium
+            ? "bg-amber-400/5 border-amber-400/30"
+            : "bg-card/40 border-border/60"
+        }
+      >
+        {isPremium ? (
+          <Lock className="size-4 text-amber-300" />
+        ) : (
+          <TriangleAlert className="size-4" />
+        )}
+        <AlertTitle className="text-sm">
+          {isPremium
+            ? "Premium posts stay in “draft” by design"
+            : "Append-only revisions"}
+        </AlertTitle>
         <AlertDescription className="text-xs text-muted-foreground">
           {isPremium
-            ? "Every save creates a new encrypted revision. The sealId is reused so readers with access keep their decryption keys."
+            ? "There is no public-publish path for encrypted content - the Move contract hardcodes encrypted=false on publish. So a premium post never gets a public revision; its encrypted draft IS what cap holders read. Each save appends a new encrypted revision under the same sealId. To make this content fully public, copy it into a new non-premium post."
             : isBinaryEntry
-              ? "This is a binary entry created via the Media tab uploader. To replace, delete and re-upload (the publication's existing posts that reference this image will still point to the old, deleted entry)."
+              ? "This is a binary entry created via the Media tab uploader. To replace, delete and re-upload (existing posts that reference this image will still point to the old, deleted entry)."
               : "Every save creates a new revision on-chain. The previous public revision stays in history forever. There is no in-place edit."}
         </AlertDescription>
       </Alert>
@@ -550,7 +685,7 @@ export default function EditPostPage({
                     <div className="flex flex-col items-center gap-2 text-primary">
                       <FileUp className="size-6" />
                       <p className="text-sm font-medium">
-                        Drop to replace content
+                        Drop a .md / .txt file to replace the body
                       </p>
                     </div>
                   </div>
@@ -560,10 +695,10 @@ export default function EditPostPage({
             </>
           )}
           <p className="text-xs text-muted-foreground">
-            Pick from your library to compose, or drop a new file from your
-            machine - text replaces the body, images and binaries upload to
-            the <code className="font-mono">{MEDIA_COLLECTION_NAME}</code>{" "}
-            collection and insert references.
+            Drop a .md or .txt file to replace the body, or use Insert image to
+            upload an image to your{" "}
+            <code className="font-mono">{MEDIA_COLLECTION_NAME}</code> library
+            and drop a reference in.
           </p>
         </div>
 
@@ -645,15 +780,15 @@ export default function EditPostPage({
               <span className="text-[11px] text-muted-foreground">
                 Encrypted · readable by cap holders
               </span>
-            ) : !isDirty && !hasDraftHead ? (
-              <span className="text-[11px] text-muted-foreground">
-                No changes
-              </span>
-            ) : hasDraftHead && entry.draftHead !== entry.publicHead ? (
+            ) : pendingDraft ? (
               <span className="text-[11px] text-amber-300">
                 Draft saved · ready to publish
               </span>
-            ) : null}
+            ) : (
+              <span className="text-[11px] text-muted-foreground">
+                No changes
+              </span>
+            )}
           </div>
           <TooltipProvider delayDuration={150}>
             <div className="flex gap-2">
@@ -705,11 +840,9 @@ export default function EditPostPage({
                   </TooltipTrigger>
                   {!canPublish ? (
                     <TooltipContent side="top" className="max-w-xs">
-                      {!hasDraftHead
-                        ? "No unpublished draft exists. Edit the body and Save draft first - publishing promotes a draft revision to public."
-                        : entry.draftHead === entry.publicHead
-                          ? "The current draft is already the public revision. Save a new draft to create something to publish."
-                          : "Wait for the current operation to finish."}
+                      {!pendingDraft
+                        ? "Nothing to publish - the public revision is already up to date. Edit the body and Save draft to create something to publish."
+                        : "Wait for the current operation to finish."}
                     </TooltipContent>
                   ) : null}
                 </Tooltip>

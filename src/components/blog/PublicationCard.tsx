@@ -1,13 +1,16 @@
 import Link from "next/link";
-import { ArrowUpRight, BookOpen, Layers } from "lucide-react";
+import { ArrowUpRight, BookOpen, Layers, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { OwnedPublicationWithDetails } from "@/services/publications";
 import { truncateAddress } from "@/utils/address";
 
 export function PublicationCard({
   item,
+  shared = false,
 }: {
   item: OwnedPublicationWithDetails;
+  /** Renders a "co-author" badge when the wallet only holds a publisher cap. */
+  shared?: boolean;
 }) {
   const { publication, publicationId } = item;
   const collectionCount = publication.collections.length;
@@ -28,9 +31,20 @@ export function PublicationCard({
         <ArrowUpRight className="size-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
       </div>
       <div className="relative flex flex-col gap-1.5">
-        <h3 className="text-base font-semibold tracking-tight truncate">
-          {publication.name}
-        </h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-base font-semibold tracking-tight truncate">
+            {publication.name}
+          </h3>
+          {shared ? (
+            <Badge
+              variant="outline"
+              className="gap-1 border-amber-400/40 bg-amber-400/10 text-amber-300 text-[10px] shrink-0"
+            >
+              <Users className="size-2.5" />
+              Co-author
+            </Badge>
+          ) : null}
+        </div>
         <p className="text-xs text-muted-foreground font-mono">
           /{publication.slug}
         </p>

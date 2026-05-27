@@ -7,7 +7,8 @@ import type {
 } from "@arcadiasystems/morse-sdk";
 
 export type OwnedPublicationWithDetails = {
-  ownerCapId: OwnerCapId;
+  /** Null when the wallet holds a PublisherCap but not the OwnerCap (co-author). */
+  ownerCapId: OwnerCapId | null;
   publicationId: PublicationId;
   publication: Publication;
 };
@@ -34,6 +35,48 @@ export async function listOwnedPublicationsWithDetails(
       return {
         ownerCapId: handle.ownerCapId,
         publicationId: handle.publicationId,
+        publication,
+      };
+    }),
+  );
+  return details;
+}
+
+/**
+ * Lists publications the wallet can write to via a PublisherCap but does
+ * NOT own (no OwnerCap). This is the "shared with me" / co-author set.
+ *
+ * A publication the wallet both owns and holds a publisher cap on is
+ * excluded here (it belongs in the owned list). We resolve ownership by
+ * cross-referencing the owned set's publication ids.
+ */
+export async function listCoauthoredPublicationsWithDetails(
+  reader: RpcPublicationReader,
+  address: SuiAddress,
+  signal?: AbortSignal,
+): Promise<OwnedPublicationWithDetails[]> {
+  const [capPage, ownedPage] = await Promise.all([
+    reader.listPublisherCapsOwnedBy(address, { signal }),
+    reader.listPublicationsOwnedBy(address, { signal }),
+  ]);
+
+  const ownedIds = new Set(ownedPage.results.map((h) => h.publicationId));
+
+  // Unique publication ids from publisher caps that we do NOT own.
+  const coauthoredIds = Array.from(
+    new Set(
+      capPage.results
+        .map((cap) => cap.publicationId)
+        .filter((id) => !ownedIds.has(id)),
+    ),
+  );
+
+  const details = await Promise.all(
+    coauthoredIds.map(async (publicationId) => {
+      const publication = await reader.getPublication(publicationId, signal);
+      return {
+        ownerCapId: null,
+        publicationId,
         publication,
       };
     }),

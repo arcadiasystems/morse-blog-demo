@@ -57,11 +57,11 @@ export default function NewBlogPage() {
         onSuccess: (result) => {
           if (result.defaultCollectionError) {
             const mapped = mapSdkError(result.defaultCollectionError);
-            toast.warning("Publication created · default collection missing", {
+            toast.warning("Blog created · default collection missing", {
               description: `${mapped.title}: ${mapped.body} You can add a "posts" collection later from admin -> Settings.`,
             });
           } else {
-            toast.success(`Publication created`, {
+            toast.success(`Blog created`, {
               description: `${name.trim()} is live at /${slug}`,
             });
           }
@@ -90,7 +90,7 @@ export default function NewBlogPage() {
         <EmptyState
           icon={<BookPlus className="size-5" />}
           title="Connect a wallet to create a blog"
-          description="Creating a publication writes a new OwnerCap and PublisherCap to your wallet. One on-chain confirmation."
+          description="Creating a blog writes a new owner cap and publisher cap to your wallet. One on-chain confirmation."
           action={<WalletButton size="lg" />}
         />
       </div>
@@ -103,13 +103,13 @@ export default function NewBlogPage() {
       <div className="flex flex-col gap-1.5">
         <h1 className="text-3xl font-bold tracking-tight">New blog</h1>
         <p className="text-sm text-muted-foreground">
-          A publication is the top-level container for your posts. You can
-          rename it later, but the slug is permanent.
+          A blog is the top-level container for your posts and media. Both the
+          name and the slug are permanent once created.
         </p>
       </div>
       <FormShell
-        title="Publication details"
-        description="One wallet popup creates the on-chain Publication, OwnerCap, and PublisherCap, then transfers them to you."
+        title="Blog details"
+        description="One wallet popup creates the on-chain blog, plus an owner cap and a publisher cap, and transfers them to you."
         onSubmit={onSubmit}
         footer={
           <>
@@ -120,7 +120,7 @@ export default function NewBlogPage() {
                   <span className="text-[11px] text-muted-foreground">
                     {create.phase === "collection"
                       ? "Step 2 of 2: default collection"
-                      : "Step 1 of 2: publication"}
+                      : "Step 1 of 2: blog"}
                   </span>
                 </div>
               ) : null}
@@ -138,7 +138,7 @@ export default function NewBlogPage() {
               ) : (
                 <>
                   <BookPlus className="size-4" />
-                  Create publication
+                  Create blog
                 </>
               )}
             </Button>
@@ -149,7 +149,7 @@ export default function NewBlogPage() {
           id="name"
           label="Name"
           required
-          help="Shows in the header and in your public blog index. Editable later."
+          help="Shows in the header and your public blog index. Permanent once created - the SDK has no rename op."
           error={nameError}
         >
           <Input

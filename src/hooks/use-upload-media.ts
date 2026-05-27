@@ -14,7 +14,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMorse } from "@/hooks/use-morse";
 import { entriesKey } from "@/hooks/use-entries";
 import { publicationKey } from "@/hooks/use-publication";
-import { MEDIA_COLLECTION_NAME } from "@/lib/morse-config";
+import {
+  MEDIA_COLLECTION_NAME,
+  WALRUS_STORAGE_EPOCHS,
+} from "@/lib/morse-config";
 
 export type UploadMediaPhase =
   | "idle"
@@ -61,7 +64,7 @@ export function useUploadMedia() {
       setPhase("uploading-walrus");
       const bytes = new Uint8Array(await input.file.arrayBuffer());
       const blob = await morse.walrusWrite.uploadBlob(bytes, {
-        epochs: 3,
+        epochs: WALRUS_STORAGE_EPOCHS,
         deletable: true,
       });
 

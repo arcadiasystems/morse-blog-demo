@@ -31,7 +31,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { classifyEntry, type EntryStatus } from "@/utils/entry-status";
+import {
+  classifyEntry,
+  hasPendingDraft,
+  isBinaryEntry,
+  type EntryStatus,
+} from "@/utils/entry-status";
 
 // Re-export the pure helpers from the server-safe util so existing imports
 // keep working. The implementation lives in `@/utils/entry-status` so server
@@ -81,6 +86,8 @@ export function EntryRow({
   const status = classifyEntry(entry);
   const meta = STATUS_META[status];
   const revisionCount = entry.revisions.length;
+  const binary = isBinaryEntry(entry);
+  const openLabel = binary ? "View" : "Edit";
   const [confirmOpen, setConfirmOpen] = useState(false);
   const qs = `?collection=${encodeURIComponent(collectionName)}`;
   const editHref = `/my-blogs/${publicationId}/posts/${entry.id}/edit${qs}`;
@@ -102,9 +109,7 @@ export function EntryRow({
             <span>
               {revisionCount} revision{revisionCount === 1 ? "" : "s"}
             </span>
-            {status !== "premium" &&
-            entry.draftHead !== null &&
-            entry.draftHead !== entry.publicHead ? (
+            {hasPendingDraft(entry) ? (
               <>
                 <span>·</span>
                 <span className="text-amber-300">draft pending</span>
@@ -131,7 +136,7 @@ export function EntryRow({
             <DropdownMenuItem asChild>
               <Link href={editHref}>
                 <PencilLine className="size-3.5" />
-                Edit
+                {openLabel}
               </Link>
             </DropdownMenuItem>
             {status === "public" ? (

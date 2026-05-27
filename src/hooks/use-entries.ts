@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { toPublicationId, type Entry } from "@arcadiasystems/morse-sdk";
-import { useMorse } from "@/hooks/use-morse";
+import { useMorseReader } from "@/hooks/use-morse-reader";
 
 export const entriesKey = (publicationId: string, collectionName: string) => [
   "entries",
@@ -13,20 +13,21 @@ export const entriesKey = (publicationId: string, collectionName: string) => [
 /**
  * Lists all entries in a collection by exhausting the entries pager. For a
  * demo with a small number of entries this is fine; production code should
- * paginate UI-side.
+ * paginate UI-side. Read-only - uses the signer-free reader so it resolves
+ * immediately on connect (no waiting on the async signer probe).
  */
 export function useEntries(
   publicationId: string | undefined,
   collectionName: string,
 ) {
-  const morse = useMorse();
+  const { reader } = useMorseReader();
 
   return useQuery<Entry[]>({
     queryKey: entriesKey(publicationId ?? "", collectionName),
     queryFn: async ({ signal }) => {
-      if (!morse || !publicationId) return [];
+      if (!publicationId) return [];
       const out: Entry[] = [];
-      for await (const entry of morse.reader.scanEntries(
+      for await (const entry of reader.scanEntries(
         toPublicationId(publicationId),
         collectionName,
         { signal },
@@ -36,7 +37,7 @@ export function useEntries(
       out.sort((a, b) => b.id - a.id);
       return out;
     },
-    enabled: Boolean(morse && publicationId),
+    enabled: Boolean(publicationId),
     staleTime: 15_000,
   });
 }

@@ -11,6 +11,19 @@ export const WALRUS_PUBLISHERS = [
 export const DEFAULT_WALRUS_PUBLISHER = WALRUS_PUBLISHERS[0];
 
 /**
+ * Walrus storage lease length, in epochs, for every blob we upload (post
+ * bodies, encrypted drafts, media). Blobs are NOT permanent: once the lease
+ * lapses the aggregator 404s the bytes. The morse Move layer rejects
+ * non-deletable blobs, so there is no "store forever" option - duration is
+ * the only knob, and the WAL cost scales with it.
+ *
+ * Testnet epoch is ~1 day and the protocol caps the lease near 53 epochs
+ * ahead, so 50 gives ~50 days of survivability - enough that a grant demo
+ * left idle for weeks won't expire mid-review. Bump toward the cap if needed.
+ */
+export const WALRUS_STORAGE_EPOCHS = 50;
+
+/**
  * Aggregator list. The SDK ships a default that points at Mysten's canonical
  * testnet aggregator and we trust it - swapping to an operator-specific
  * aggregator (e.g. nami.cloud) caused CORS/DNS issues that surfaced as

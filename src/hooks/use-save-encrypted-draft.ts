@@ -13,6 +13,7 @@ import { useMorse } from "@/hooks/use-morse";
 import { entriesKey } from "@/hooks/use-entries";
 import { entryContentKey } from "@/hooks/use-entry-content";
 import { DEFAULT_COLLECTION_NAME } from "@/hooks/use-create-publication";
+import { WALRUS_STORAGE_EPOCHS } from "@/lib/morse-config";
 
 export type SaveEncryptedDraftPhase =
   | "idle"
@@ -59,7 +60,7 @@ export function useSaveEncryptedDraft() {
 
       setPhase("uploading-walrus");
       const blob = await morse.walrusWrite.uploadBlob(ciphertext, {
-        epochs: 3,
+        epochs: WALRUS_STORAGE_EPOCHS,
         deletable: true,
       });
 

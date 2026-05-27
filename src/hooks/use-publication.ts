@@ -5,21 +5,20 @@ import {
   toPublicationId,
   type Publication,
 } from "@arcadiasystems/morse-sdk";
-import { useMorse } from "@/hooks/use-morse";
+import { useMorseReader } from "@/hooks/use-morse-reader";
 
 export const publicationKey = (id: string) => ["publication", id];
 
 export function usePublication(id: string | undefined) {
-  const morse = useMorse();
+  const { reader } = useMorseReader();
 
   return useQuery<Publication>({
     queryKey: publicationKey(id ?? ""),
     queryFn: async ({ signal }) => {
-      if (!morse) throw new Error("Wallet not connected");
       if (!id) throw new Error("Missing publication id");
-      return morse.reader.getPublication(toPublicationId(id), signal);
+      return reader.getPublication(toPublicationId(id), signal);
     },
-    enabled: Boolean(morse && id),
+    enabled: Boolean(id),
     staleTime: 15_000,
   });
 }

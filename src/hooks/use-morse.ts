@@ -92,8 +92,10 @@ export function useMorse(): MorseClient | null {
   }, [account, signAndExecute]);
 
   useEffect(() => {
+    // Clear any client from a previous account immediately so write ops
+    // never target a stale wallet while the new signer is being built.
+    setClient(null);
     if (!baseline) {
-      setClient(null);
       return;
     }
     let cancelled = false;
