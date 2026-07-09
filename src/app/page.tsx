@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Lock, PencilLine, Wallet } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ConnectCta } from "@/components/layout/ConnectCta";
+import { DEMO_PUBLICATION_ID } from "@/lib/morse-config";
 
 export default function HomePage() {
   return (
@@ -37,6 +38,15 @@ export default function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-3">
             <ConnectCta />
+            {DEMO_PUBLICATION_ID && (
+              <Link
+                href={`/${DEMO_PUBLICATION_ID}`}
+                className="text-sm font-medium text-primary hover:text-primary/80 transition-colors inline-flex items-center gap-1.5 group"
+              >
+                Read the demo blog
+                <ArrowRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            )}
             <Link
               href="/about"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5 group"

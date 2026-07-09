@@ -22,7 +22,7 @@ export function MainnetBanner() {
           <span className="font-semibold text-destructive">
             Mainnet is disabled in this demo.
           </span>{" "}
-          morse-sdk is testnet-only at v0.1.x. Switch your wallet network to{" "}
+          Morse is testnet-only for now. Switch your wallet network to{" "}
           <span className="font-semibold">Sui Testnet</span> to continue.
         </p>
       </div>

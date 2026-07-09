@@ -50,6 +50,13 @@ export const FAUCET_URLS = {
   wal: "https://stake-wal.wal.app/",
 } as const;
 
+/**
+ * Publication rendered by the homepage's "Read the demo blog" link.
+ * Set after seeding (see seed/); empty string hides the link.
+ */
+export const DEMO_PUBLICATION_ID =
+	process.env.NEXT_PUBLIC_DEMO_PUBLICATION_ID ?? "";
+
 export const DEFAULT_COLLECTION_NAME = "posts";
 export const MEDIA_COLLECTION_NAME = "media";
 

@@ -4,7 +4,19 @@ A demo blog application built on [`@arcadiasystems/morse-sdk`](https://www.npmjs
 
 Built to exercise the SDK end-to-end from a real browser app. Connect a Sui testnet wallet, spin up a publication, write public and premium (encrypted) posts, edit revisions with a draft → publish flow, manage a media library, invite co-authors via publisher caps — all on-chain, no backend.
 
-> Live demo: _add your Vercel URL here once deployed_
+> **Live demo: [morse-blog-demo.vercel.app](https://morse-blog-demo.vercel.app)** — click "Read the demo blog" for a seeded publication (no wallet needed to read).
+
+## Seeding demo content
+
+`seed/` contains curated posts and a one-command seeding script (used for the publication linked from the homepage, and to re-seed after Walrus testnet wipes):
+
+```sh
+npm install -g @arcadiasystems/morse-cli
+export MORSE_PRIVATE_KEY=suiprivkey1...   # funded with testnet SUI + WAL
+./seed/seed.sh                             # prints the new publication ID
+```
+
+Then set `NEXT_PUBLIC_DEMO_PUBLICATION_ID` to that ID and redeploy — the homepage "Read the demo blog" link appears automatically.
 
 ## What this demonstrates
 
