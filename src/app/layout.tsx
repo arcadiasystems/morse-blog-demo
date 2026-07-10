@@ -1,22 +1,30 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { Space_Grotesk, Space_Mono, Unbounded } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { MainnetBanner } from "@/components/layout/MainnetBanner";
 
-const sans = Plus_Jakarta_Sans({
+const sans = Space_Grotesk({
   variable: "--font-sans",
   subsets: ["latin"],
   display: "swap",
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "500", "700"],
 });
 
-const mono = JetBrains_Mono({
+const heading = Unbounded({
+  variable: "--font-heading-face",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["500", "700", "900"],
+});
+
+const mono = Space_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
   display: "swap",
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -33,7 +41,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${sans.variable} ${mono.variable} h-full antialiased`}
+      className={`dark ${sans.variable} ${mono.variable} ${heading.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Providers>

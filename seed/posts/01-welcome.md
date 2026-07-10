@@ -1,5 +1,3 @@
-# Welcome — this blog has no backend
-
 Everything you're reading right now is served without a CMS vendor, a database, or an admin server.
 
 - The **publication** you're browsing is a shared object on **Sui testnet** — its identity, permissions, and revision history live in Move smart contracts.

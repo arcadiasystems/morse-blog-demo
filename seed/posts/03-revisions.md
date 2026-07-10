@@ -1,5 +1,3 @@
-# How revisions work: the dual-head model
-
 A CMS without drafts is a typewriter. Here's how Morse does editorial workflow on-chain.
 
 Every entry keeps an **append-only vector of revisions** — nothing is ever mutated in place. Two pointers index into it:

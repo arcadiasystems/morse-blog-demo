@@ -1,5 +1,3 @@
-# Why your CMS should be a protocol
-
 Every headless CMS makes the same trade: great ergonomics now, a landlord forever.
 
 Your content model, your edit history, your team's permissions — all of it lives inside a vendor's database. Migrating means rebuilding. Pricing changes are weather. And the audit trail is whatever the vendor says it is.

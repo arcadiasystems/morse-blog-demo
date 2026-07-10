@@ -1,5 +1,3 @@
-# The launch playbook (premium)
-
 If you can read this, Seal decryption just worked end-to-end: this post was encrypted client-side before it ever touched Walrus, and your wallet signature is what unlocked it. No paywall server, no DRM middleware — a threshold-encryption network and an on-chain policy.
 
 Here's the part we gate behind the demo paywall — the honest launch checklist we used for Morse itself:

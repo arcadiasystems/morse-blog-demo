@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCurrentAccount } from "@mysten/dapp-kit";
-import { Ban, Radio } from "lucide-react";
+import { Ban } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -26,11 +26,17 @@ export function Header() {
             className="flex items-center gap-2 group shrink-0"
             aria-label="morse blog home"
           >
-            <span className="grid place-items-center size-8 rounded-md bg-primary/15 text-primary border border-primary/30 group-hover:bg-primary/25 transition-colors">
-              <Radio className="size-4" />
+            <span className="flex flex-col items-start gap-[3px] border border-foreground px-2 py-1">
+              <span className="font-heading text-[11px] font-bold uppercase leading-none tracking-[0.18em] text-foreground">
+                Morse
+              </span>
+              <span aria-hidden className="flex items-center gap-[2px] text-primary">
+                {/* M O R S E in morse code */}
+                <i className="mc-dash" /><i className="mc-dash" /><i className="mc-gap" /><i className="mc-dash" /><i className="mc-dash" /><i className="mc-dash" /><i className="mc-gap" /><i className="mc-dot" /><i className="mc-dash" /><i className="mc-dot" /><i className="mc-gap" /><i className="mc-dot" /><i className="mc-dot" /><i className="mc-dot" /><i className="mc-gap" /><i className="mc-dot" />
+              </span>
             </span>
-            <span className="font-semibold tracking-tight text-base">
-              morse<span className="text-primary">·</span>blog
+            <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+              Blog
             </span>
           </Link>
           <TooltipProvider delayDuration={150}>
