@@ -55,7 +55,8 @@ export const FAUCET_URLS = {
  * Set after seeding (see seed/); empty string hides the link.
  */
 export const DEMO_PUBLICATION_ID =
-	process.env.NEXT_PUBLIC_DEMO_PUBLICATION_ID ?? "";
+	process.env.NEXT_PUBLIC_DEMO_PUBLICATION_ID ??
+	"0x69d4c49be455c72c91de0fdabbb9d94f396ace0cc7f5bbd4b858086dde9cf327";
 
 export const DEFAULT_COLLECTION_NAME = "posts";
 export const MEDIA_COLLECTION_NAME = "media";
