@@ -1,60 +1,22 @@
 {
-  "name": "morse-blog-demo",
-  "version": "0.1.0",
+  "name": "morse-blog",
   "private": true,
-  "license": "MIT",
-  "description": "Live demo of @arcadiasystems/morse-sdk - decentralized blog on Sui with Walrus storage and Seal-encrypted premium content",
-  "homepage": "https://github.com/arcadiasystems/morse-blog-demo",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/arcadiasystems/morse-blog-demo.git"
-  },
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "@arcadiasystems/morse-sdk": "0.4.3",
-    "@mysten/dapp-kit": "1.0.6",
-    "@mysten/seal": "1.1.3",
-    "@mysten/sui": "2.16.2",
-    "@mysten/walrus": "1.1.6",
-    "@tanstack/react-query": "^5.100.11",
-    "@uiw/react-md-editor": "^4.1.0",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "lucide-react": "^1.16.0",
-    "next": "16.2.6",
-    "next-themes": "^0.4.6",
-    "radix-ui": "^1.4.3",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1",
-    "shadcn": "^4.7.0",
-    "sonner": "^2.0.7",
-    "tailwind-merge": "^3.6.0",
-    "tw-animate-css": "^1.4.0"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@tailwindcss/typography": "^0.5.19",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.6",
-    "tailwindcss": "^4",
-    "typescript": "^5"
-  },
-  "ignoreScripts": [
-    "sharp",
-    "unrs-resolver"
+  "workspaces": [
+    "packages/*",
+    "apps/*"
   ],
-  "trustedDependencies": [
-    "sharp",
-    "unrs-resolver"
-  ]
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "dev:demo": "turbo dev --filter=@morse/demo",
+    "dev:clean": "turbo dev --filter=@morse/clean",
+    "dev:editorial": "turbo dev --filter=@morse/editorial",
+    "dev:magazine": "turbo dev --filter=@morse/magazine",
+    "dev:minimal": "turbo dev --filter=@morse/minimal"
+  },
+  "packageManager": "npm@11.6.2",
+  "devDependencies": {
+    "turbo": "^2"
+  }
 }
