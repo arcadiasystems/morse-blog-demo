@@ -2,6 +2,13 @@ import { morseConfig } from "@arcadiasystems/morse-sdk";
 
 export const MORSE_NETWORK = "testnet" as const;
 
+/**
+ * Sui GraphQL endpoint for the demo network. Public fullnodes no longer serve
+ * JSON-RPC, and the SDK reader has no transaction-history queries, so the
+ * post page's on-chain record (tx digest, anchor time, epoch) reads from here.
+ */
+export const SUI_GRAPHQL_URL = `https://graphql.${MORSE_NETWORK}.sui.io/graphql`;
+
 export const WALRUS_PUBLISHERS = [
   "https://walrus-testnet-publisher.nami.cloud",
   "https://publisher.testnet.walrus.atalma.io",

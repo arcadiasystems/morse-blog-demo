@@ -276,3 +276,16 @@ export function mapSdkError(err: unknown): MappedError {
     severity: "error",
   };
 }
+
+/**
+ * True when an error came from fetching a blob's bytes from Walrus (the
+ * aggregator failed, or the blob is gone), as opposed to wallet, Seal or
+ * contract failures. Readers get a retry state for these instead of a toast.
+ */
+export function isWalrusReadFailure(err: unknown): boolean {
+  if (err instanceof NotFoundError) return err.resource === "blob";
+  if (err instanceof TransportError) {
+    return err.operation?.startsWith("walrus.aggregator.") ?? false;
+  }
+  return false;
+}

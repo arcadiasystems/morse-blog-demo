@@ -7,6 +7,7 @@ import {
 } from "@arcadiasystems/morse-sdk";
 import { DEFAULT_COLLECTION_NAME } from "@/lib/morse-config";
 import { getServerMorseReader } from "@/services/morse-reader.server";
+import { resolveWalrusBlobId } from "@/services/walrus-blob-id";
 
 export type PublicBlogData = {
   publication: Publication;
@@ -63,14 +64,42 @@ export async function loadPublicEntry(
 
 const TEXT_DECODER = new TextDecoder();
 
+/**
+ * How long the public post page waits on the Walrus aggregator before it
+ * gives up and shows the "Could not load this revision" state.
+ */
+const REVISION_READ_TIMEOUT_MS = 15_000;
+
 export async function readPublicRevisionText(
   blobRef: BlobRef,
 ): Promise<string | null> {
   const { walrusRead } = getServerMorseReader();
   try {
-    const bytes = await walrusRead.readBlobRef(blobRef);
+    const bytes = await walrusRead.readBlobRef(blobRef, {
+      signal: AbortSignal.timeout(REVISION_READ_TIMEOUT_MS),
+    });
     return TEXT_DECODER.decode(bytes);
   } catch {
+    return null;
+  }
+}
+
+/**
+ * Walrus blob id behind a revision, for display and aggregator links. Null
+ * for quilt patches (no standalone blob) or when the Sui lookup fails.
+ */
+export async function resolvePublicBlobId(
+  blobRef: BlobRef,
+): Promise<string | null> {
+  if (blobRef.kind !== "blob") return null;
+  const { client } = getServerMorseReader();
+  try {
+    return await resolveWalrusBlobId(client, blobRef.blobObjectId);
+  } catch (err) {
+    console.error(
+      `[public-blog] Could not resolve blob id for ${blobRef.blobObjectId}`,
+      err,
+    );
     return null;
   }
 }
