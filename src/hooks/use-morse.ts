@@ -92,9 +92,6 @@ export function useMorse(): MorseClient | null {
   }, [account, signAndExecute]);
 
   useEffect(() => {
-    // Clear any client from a previous account immediately so write ops
-    // never target a stale wallet while the new signer is being built.
-    setClient(null);
     if (!baseline) {
       return;
     }
@@ -137,5 +134,11 @@ export function useMorse(): MorseClient | null {
     };
   }, [baseline, signTransaction, signPersonalMessage]);
 
-  return client;
+  // `client` is set once the signer resolves, so right after an account
+  // switch it still holds the previous wallet's client. Hand it out only
+  // when it was built from the current baseline, so write ops never target
+  // a stale wallet while the new signer is being built.
+  return client !== null && client.adapter === baseline?.adapter
+    ? client
+    : null;
 }

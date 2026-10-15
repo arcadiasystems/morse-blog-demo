@@ -4,7 +4,6 @@ import {
   DragEvent,
   use,
   useCallback,
-  useEffect,
   useState,
 } from "react";
 import Link from "next/link";
@@ -88,6 +87,13 @@ export default function EditPostPage({
       (c) => c.name === MEDIA_COLLECTION_NAME,
     ) ?? false;
 
+  const [markdown, setMarkdown] = useState("");
+  const [originalContent, setOriginalContent] = useState("");
+  const [seeded, setSeeded] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const [decrypted, setDecrypted] = useState(false);
+  const [rewriting, setRewriting] = useState(false);
+
   const insertMarkdown = (snippet: string) => {
     setMarkdown((prev) => {
       const sep =
@@ -107,12 +113,6 @@ export default function EditPostPage({
   const deletePost = useDeletePost();
   const unlock = useUnlockEntry();
 
-  const [markdown, setMarkdown] = useState("");
-  const [originalContent, setOriginalContent] = useState("");
-  const [dragging, setDragging] = useState(false);
-  const [decrypted, setDecrypted] = useState(false);
-  const [rewriting, setRewriting] = useState(false);
-
   const entry = content.data?.entry;
   const draftRev =
     entry && entry.draftHead !== null ? entry.revisions[entry.draftHead] : null;
@@ -130,14 +130,20 @@ export default function EditPostPage({
   const entryContentType = content.data?.contentType ?? "text/markdown";
   const isImageEntry = isBinaryEntry && entryContentType.startsWith("image/");
 
-  useEffect(() => {
-    if (!content.data || content.isFetching) return;
-    if (isPremium) return;
-    if (originalContent !== "") return;
-    if (content.data.content === null) return; // binary - no text body to load
+  // Seed the editor once from the first settled fetch. Later refetches never
+  // overwrite edits. Premium bodies arrive through the decrypt flow and
+  // binary entries have no text body (content === null), so neither seeds.
+  if (
+    !seeded &&
+    content.data &&
+    !content.isFetching &&
+    !isPremium &&
+    content.data.content !== null
+  ) {
+    setSeeded(true);
     setMarkdown(content.data.content);
     setOriginalContent(content.data.content);
-  }, [content.data, content.isFetching, isPremium, originalContent]);
+  }
 
   const onDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
