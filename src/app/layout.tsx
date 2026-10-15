@@ -1,36 +1,42 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Space_Mono, Unbounded } from "next/font/google";
+import {
+  Bricolage_Grotesque,
+  IBM_Plex_Mono,
+  Instrument_Sans,
+} from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { MainnetBanner } from "@/components/layout/MainnetBanner";
 
-const sans = Space_Grotesk({
-  variable: "--font-sans",
+const display = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
   display: "swap",
-  weight: ["400", "500", "700"],
+  axes: ["opsz"],
 });
 
-const heading = Unbounded({
-  variable: "--font-heading-face",
+const sans = Instrument_Sans({
+  variable: "--font-instrument",
   subsets: ["latin"],
   display: "swap",
-  weight: ["500", "700", "900"],
 });
 
-const mono = Space_Mono({
-  variable: "--font-mono",
+const mono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
   subsets: ["latin"],
   display: "swap",
-  weight: ["400", "700"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
-  title: "morse · blog - decentralized publishing on Sui",
-  description:
-    "A demo blog you actually own. Built on @arcadiasystems/morse-sdk with Walrus storage and Seal encryption.",
+  title: {
+    default: "morse·blog, a blog you actually own",
+    template: "%s · morse·blog",
+  },
+  description: "A working demo of @arcadiasystems/morse-sdk on Sui testnet.",
+  icons: { icon: { url: "/favicon.svg", type: "image/svg+xml" } },
 };
 
 export default function RootLayout({
@@ -41,15 +47,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${sans.variable} ${mono.variable} ${heading.variable} h-full antialiased`}
+      className={`${display.variable} ${sans.variable} ${mono.variable}`}
     >
-      <body className="min-h-full flex flex-col">
+      <body>
         <Providers>
           <MainnetBanner />
           <Header />
-          <main className="flex-1 mx-auto w-full max-w-6xl px-4 py-8">
-            {children}
-          </main>
+          <main>{children}</main>
           <Footer />
         </Providers>
       </body>

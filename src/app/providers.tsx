@@ -46,7 +46,7 @@ export function Providers({ children }: { children: ReactNode }) {
         <WalletProvider autoConnect>
           <WalletCacheReset />
           {children}
-          <Toaster position="bottom-right" richColors theme="dark" />
+          <Toaster position="bottom-right" />
         </WalletProvider>
       </SuiClientProvider>
     </QueryClientProvider>

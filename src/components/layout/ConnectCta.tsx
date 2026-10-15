@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 import { useCurrentAccount } from "@mysten/dapp-kit";
-import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { WalletButton } from "@/components/layout/WalletButton";
 
 export function ConnectCta() {
@@ -11,11 +9,9 @@ export function ConnectCta() {
 
   if (account) {
     return (
-      <Button asChild size="lg" className="gap-2">
-        <Link href="/my-blogs">
-          Go to my blogs <ArrowRight className="size-4" />
-        </Link>
-      </Button>
+      <Link className="btn btn-ultra lg" href="/my-blogs">
+        Go to my blogs <span aria-hidden="true">→</span>
+      </Link>
     );
   }
 
