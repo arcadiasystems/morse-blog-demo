@@ -291,7 +291,7 @@ export default function PublicationAdminPage({
         </TabsContent>
 
         <TabsContent value="members" className="mt-2">
-          <MembersTab publicationId={publicationId} />
+          <MembersTab key={publicationId} publicationId={publicationId} />
         </TabsContent>
 
         <TabsContent value="settings" className="mt-2 flex flex-col gap-5">

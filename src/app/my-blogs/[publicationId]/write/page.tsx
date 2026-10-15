@@ -126,7 +126,6 @@ export default function WritePostPage({
       setDragging(false);
       const files = Array.from(e.dataTransfer.files ?? []);
       for (const file of files) {
-        // eslint-disable-next-line no-await-in-loop
         await handleFile(file);
       }
     },

@@ -37,6 +37,10 @@ type Props = {
 
 const DECODER = new TextDecoder();
 
+type BodyRead =
+  | { revision: Revision; text: string; error: null }
+  | { revision: Revision; text: null; error: Error };
+
 function isTextContentType(contentType: string): boolean {
   if (!contentType) return true;
   if (contentType.startsWith("text/")) return true;
@@ -58,9 +62,7 @@ export function RevisionViewer({
   onCopyToEditor,
 }: Props) {
   const morse = useMorse();
-  const [text, setText] = useState<string | null>(null);
-  const [error, setError] = useState<Error | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [bodyRead, setBodyRead] = useState<BodyRead | null>(null);
 
   const open = revision !== null;
   const isEncrypted = revision?.encrypted ?? false;
@@ -70,32 +72,37 @@ export function RevisionViewer({
   const isPublicHead = revision !== null && entry.publicHead === revision.id;
   const isDraftHead = revision !== null && entry.draftHead === revision.id;
 
+  const canRead = morse !== null && revision !== null && isText;
+
   useEffect(() => {
-    setText(null);
-    setError(null);
-    if (!morse || !revision || isEncrypted) return;
-    if (!isText) return;
+    if (!morse || !revision || !isText) return;
 
     let cancelled = false;
-    setLoading(true);
     morse.walrusRead
       .readBlobRef(revision.blobRef)
       .then((bytes) => {
         if (cancelled) return;
-        setText(DECODER.decode(bytes));
+        setBodyRead({ revision, text: DECODER.decode(bytes), error: null });
       })
       .catch((err: unknown) => {
         if (cancelled) return;
-        setError(err instanceof Error ? err : new Error(String(err)));
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
+        setBodyRead({
+          revision,
+          text: null,
+          error: err instanceof Error ? err : new Error(String(err)),
+        });
       });
 
     return () => {
       cancelled = true;
     };
-  }, [morse, revision, isEncrypted, isText]);
+  }, [morse, revision, isText]);
+
+  // A read left over from a previously viewed revision is never shown.
+  const current = bodyRead?.revision === revision ? bodyRead : null;
+  const text = current?.text ?? null;
+  const error = current?.error ?? null;
+  const loading = canRead && current === null;
 
   return (
     <Dialog open={open} onOpenChange={(o) => (o ? null : onClose())}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import {
   Copy,
   Info,
@@ -77,12 +77,13 @@ export function MembersTab({ publicationId }: { publicationId: string }) {
 
   const [holder, setHolder] = useState("");
   const [holderError, setHolderError] = useState<string | null>(null);
-  const [issuedCaps, setIssuedCaps] = useState<IssuedCap[]>([]);
+  // Read once on mount. The tab only renders client-side behind a connected
+  // wallet, so this never runs during SSR, and the parent keys it by
+  // publicationId so switching blogs remounts it with that blog's list.
+  const [issuedCaps, setIssuedCaps] = useState<IssuedCap[]>(() =>
+    loadIssued(publicationId),
+  );
   const [revokingId, setRevokingId] = useState<string | null>(null);
-
-  useEffect(() => {
-    setIssuedCaps(loadIssued(publicationId));
-  }, [publicationId]);
 
   if (ownerCap.isPending) {
     return <p className="text-sm text-muted-foreground">Loading...</p>;

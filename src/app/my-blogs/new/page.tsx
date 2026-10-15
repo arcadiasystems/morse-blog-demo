@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, BookPlus, Loader2 } from "lucide-react";
@@ -23,15 +23,10 @@ export default function NewBlogPage() {
   const create = useCreatePublication();
 
   const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
-  const [slugTouched, setSlugTouched] = useState(false);
+  // null until the user edits the slug; until then it follows the name.
+  const [customSlug, setCustomSlug] = useState<string | null>(null);
   const [slugServerError, setSlugServerError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!slugTouched) {
-      setSlug(slugify(name));
-    }
-  }, [name, slugTouched]);
+  const slug = customSlug ?? slugify(name);
 
   const slugLocalError = useMemo(() => {
     if (slug.length === 0) return null;
@@ -180,8 +175,7 @@ export default function NewBlogPage() {
             id="slug"
             value={slug}
             onChange={(e) => {
-              setSlugTouched(true);
-              setSlug(e.target.value.toLowerCase());
+              setCustomSlug(e.target.value.toLowerCase());
               if (slugServerError) setSlugServerError(null);
             }}
             placeholder="my-morse-blog"

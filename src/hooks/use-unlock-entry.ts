@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   toPublisherCapId,
   type Entry,
@@ -34,14 +34,19 @@ const DECODER = new TextDecoder();
  */
 export function useUnlockEntry() {
   const morse = useMorse();
-  const sessionKeyRef = useRef<SessionKey | null>(null);
+  const [cachedSessionKey, setCachedSessionKey] = useState<SessionKey | null>(
+    null,
+  );
   const [phase, setPhase] = useState<UnlockPhase>("idle");
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    sessionKeyRef.current = null;
-  }, [morse?.account?.address]);
+  // A key signed by a previous account is never reused after a switch.
+  const sessionKey =
+    cachedSessionKey !== null &&
+    cachedSessionKey.getAddress() === morse?.signer.toSuiAddress()
+      ? cachedSessionKey
+      : null;
 
   const unlock = useCallback(
     async (input: UnlockInput): Promise<string> => {
@@ -58,7 +63,7 @@ export function useUnlockEntry() {
       setIsPending(true);
       setError(null);
       try {
-        let sk = sessionKeyRef.current;
+        let sk = sessionKey;
         if (!sk || sk.isExpired()) {
           setPhase("signing-session");
           sk = await SessionKey.create({
@@ -69,7 +74,7 @@ export function useUnlockEntry() {
             signer: morse.signer,
             suiClient: morse.client,
           });
-          sessionKeyRef.current = sk;
+          setCachedSessionKey(sk);
         }
 
         setPhase("fetching-blob");
@@ -93,10 +98,10 @@ export function useUnlockEntry() {
         setTimeout(() => setPhase("idle"), 500);
       }
     },
-    [morse],
+    [morse, sessionKey],
   );
 
-  const hasSessionKey = sessionKeyRef.current !== null;
+  const hasSessionKey = sessionKey !== null;
 
   return { unlock, phase, isPending, error, hasSessionKey };
 }
