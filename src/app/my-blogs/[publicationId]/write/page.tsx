@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useCurrentAccount } from "@mysten/dapp-kit";
+import type { AddEntryResult } from "@arcadiasystems/morse-sdk";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,7 @@ import {
 } from "@/components/ui/tooltip";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
+import { showPublishToast } from "@/components/feedback/PublishToast";
 import { StatusIndicator } from "@/components/feedback/StatusIndicator";
 import { Field } from "@/components/forms/Field";
 import { FormShell } from "@/components/forms/FormShell";
@@ -202,11 +204,13 @@ export default function WritePostPage({
     } as const;
 
     const handlers = {
-      onSuccess: (result: { entryId: number }) => {
-        toast.success(premium ? "Premium post published" : "Post published", {
-          description: premium
-            ? `Encrypted entry #${result.entryId} is live - readers need to unlock.`
-            : `Entry #${result.entryId} is live.`,
+      onSuccess: (result: AddEntryResult) => {
+        showPublishToast({
+          publicationId,
+          collectionName,
+          entryId: result.entryId,
+          revisionId: result.revisionId,
+          digest: result.digest,
         });
         router.push(`/my-blogs/${publicationId}`);
       },

@@ -20,6 +20,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyPublication } from "@/components/feedback/EmptyPublication";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import { AdminHeader } from "@/components/blog/AdminHeader";
@@ -235,19 +236,7 @@ export default function PublicationAdminPage({
               }
             />
           ) : publicEntries.length === 0 ? (
-            <EmptyState
-              icon={<FileText className="size-5" />}
-              title="No posts yet"
-              description="Write your first post. Body content goes to Walrus, the on-chain entry references the blob."
-              action={
-                <Button asChild className="gap-1.5">
-                  <Link href={`/my-blogs/${publicationId}/write`}>
-                    <Plus className="size-3.5" />
-                    Write first post
-                  </Link>
-                </Button>
-              }
-            />
+            <EmptyPublication publicationId={publicationId} />
           ) : (
             <ul className="flex flex-col gap-2">
               {publicEntries.map((entry) => (
