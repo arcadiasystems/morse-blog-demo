@@ -416,8 +416,8 @@ export default function EditPostPage({
           </h1>
         </div>
 
-        <div className="flex flex-col items-center gap-5 rounded-xl border border-amber-400/30 bg-amber-400/5 px-6 py-12 text-center">
-          <div className="grid place-items-center size-12 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/40">
+        <div className="flex flex-col items-center gap-5 rounded-xl border border-warn-line bg-warn-bg px-6 py-12 text-center">
+          <div className="grid place-items-center size-12 rounded-full bg-warn-bg text-warn border border-warn-line">
             <TriangleAlert className="size-5" />
           </div>
           <div className="flex flex-col gap-2 max-w-md">
@@ -487,7 +487,7 @@ export default function EditPostPage({
           {isPremium ? (
             <Badge
               variant="outline"
-              className="gap-1 border-amber-400/40 bg-amber-400/10 text-amber-300"
+              className="gap-1 border-warn-line bg-warn-bg text-warn"
             >
               <Lock className="size-3" />
               Premium
@@ -507,7 +507,7 @@ export default function EditPostPage({
           {!isPremium && pendingDraft ? (
             <Badge
               variant="outline"
-              className="border-amber-400/40 bg-amber-400/10 text-amber-300"
+              className="border-warn-line bg-warn-bg text-warn"
             >
               Draft pending publish
             </Badge>
@@ -528,8 +528,8 @@ export default function EditPostPage({
       </div>
 
       {blobMissing ? (
-        <Alert className="bg-amber-400/5 border-amber-400/40">
-          <TriangleAlert className="size-4 text-amber-300" />
+        <Alert className="bg-warn-bg border-warn-line">
+          <TriangleAlert className="size-4 text-warn" />
           <AlertTitle className="text-sm">
             Re-authoring expired content
           </AlertTitle>
@@ -546,12 +546,12 @@ export default function EditPostPage({
       <Alert
         className={
           isPremium
-            ? "bg-amber-400/5 border-amber-400/30"
+            ? "bg-warn-bg border-warn-line"
             : "bg-card/40 border-border/60"
         }
       >
         {isPremium ? (
-          <Lock className="size-4 text-amber-300" />
+          <Lock className="size-4 text-warn" />
         ) : (
           <TriangleAlert className="size-4" />
         )}
@@ -616,8 +616,8 @@ export default function EditPostPage({
               </div>
             </div>
           ) : isPremium && !decrypted ? (
-            <div className="flex flex-col items-center gap-4 rounded-xl border border-amber-400/30 bg-amber-400/5 px-6 py-10 text-center">
-              <div className="grid place-items-center size-12 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/40">
+            <div className="flex flex-col items-center gap-4 rounded-xl border border-warn-line bg-warn-bg px-6 py-10 text-center">
+              <div className="grid place-items-center size-12 rounded-full bg-warn-bg text-warn border border-warn-line">
                 <Lock className="size-5" />
               </div>
               <div className="flex flex-col gap-1">
@@ -773,7 +773,7 @@ export default function EditPostPage({
                 </span>
               </div>
             ) : isDirty ? (
-              <span className="text-[11px] text-amber-300">
+              <span className="text-[11px] text-warn">
                 Unsaved changes
               </span>
             ) : isPremium ? (
@@ -781,7 +781,7 @@ export default function EditPostPage({
                 Encrypted · readable by cap holders
               </span>
             ) : pendingDraft ? (
-              <span className="text-[11px] text-amber-300">
+              <span className="text-[11px] text-warn">
                 Draft saved · ready to publish
               </span>
             ) : (

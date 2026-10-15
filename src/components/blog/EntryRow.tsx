@@ -56,12 +56,12 @@ const STATUS_META: Record<
   draft: {
     label: "Draft",
     icon: <PencilLine className="size-3" />,
-    tone: "border-amber-400/40 bg-amber-400/10 text-amber-300",
+    tone: "border-warn-line bg-warn-bg text-warn",
   },
   premium: {
     label: "Premium",
     icon: <Lock className="size-3" />,
-    tone: "border-amber-400/40 bg-amber-400/10 text-amber-300",
+    tone: "border-warn-line bg-warn-bg text-warn",
   },
   empty: {
     label: "Empty",
@@ -112,7 +112,7 @@ export function EntryRow({
             {hasPendingDraft(entry) ? (
               <>
                 <span>·</span>
-                <span className="text-amber-300">draft pending</span>
+                <span className="text-warn">draft pending</span>
               </>
             ) : null}
           </div>
