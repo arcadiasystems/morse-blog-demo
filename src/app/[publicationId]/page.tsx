@@ -1,12 +1,15 @@
-import Link from "next/link";
-import { ArrowLeft, BookOpen, FileText } from "lucide-react";
 import { notFound } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { EmptyState } from "@/components/feedback/EmptyState";
-import { PublicEntryCard } from "@/components/blog/PublicEntryCard";
-import { classifyEntry } from "@/utils/entry-status";
+import { EmptyPublication } from "@/components/feedback/EmptyPublication";
+import { PostList, type PostRowData } from "@/components/blog/PostList";
+import { PublicationHeader } from "@/components/blog/PublicationHeader";
+import { readerHead } from "@/utils/entry-status";
 import { loadPublicBlog } from "@/services/public-blog.server";
+import {
+  anchorEntryRevisions,
+  loadPublicationHistory,
+  loadPublicationOwner,
+} from "@/services/publication-history.server";
+import styles from "./publication.module.css";
 
 // Always re-fetch on each request - testnet state changes minute-to-minute
 // and a stale cache makes the public reader feel broken right after a publish.
@@ -19,74 +22,53 @@ export default async function PublicBlogIndexPage({
   params: Promise<{ publicationId: string }>;
 }) {
   const { publicationId } = await params;
-  const data = await loadPublicBlog(publicationId);
+  const [data, history] = await Promise.all([
+    loadPublicBlog(publicationId),
+    loadPublicationHistory(publicationId),
+  ]);
 
   if (!data) {
     notFound();
   }
 
   const { publication, entries } = data;
-  const visibleEntries = entries.filter((e) => {
-    const s = classifyEntry(e);
-    return s === "public" || s === "premium";
+  const ownerAddress = history?.ownerCapId
+    ? await loadPublicationOwner(history.ownerCapId)
+    : null;
+
+  const rows: PostRowData[] = entries.flatMap((entry) => {
+    const head = readerHead(entry);
+    if (!head) return [];
+    const anchor = history
+      ? anchorEntryRevisions(history, entry)[head.index]
+      : null;
+    return [
+      {
+        entry,
+        premium: head.premium,
+        revisionNumber: head.index + 1,
+        anchoredAtMs: anchor?.timestampMs ?? null,
+      },
+    ];
   });
-  const publicCount = visibleEntries.filter(
-    (e) => classifyEntry(e) === "public",
-  ).length;
 
   return (
-    <div className="flex flex-col gap-8 py-4 sm:py-8 max-w-4xl">
-      <Button
-        asChild
-        variant="ghost"
-        size="sm"
-        className="self-start gap-1.5 -ml-2"
-      >
-        <Link href="/">
-          <ArrowLeft className="size-4" />
-          Home
-        </Link>
-      </Button>
-
-      <header className="flex flex-col gap-3">
-        <Badge
-          variant="outline"
-          className="self-start border-primary/40 bg-primary/10 text-primary"
-        >
-          Public blog
-        </Badge>
-        <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
-          {publication.name}
-        </h1>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span className="font-mono">/{publication.slug}</span>
-          <span>·</span>
-          <span>
-            {publicCount} {publicCount === 1 ? "post" : "posts"}
-          </span>
+    <>
+      <PublicationHeader
+        publication={publication}
+        entryCount={rows.length}
+        ownerAddress={ownerAddress}
+      />
+      <section>
+        <div className={`wrap ${styles.posts}`}>
+          {rows.length === 0 ? (
+            <EmptyPublication publicationId={publication.id} />
+          ) : (
+            <PostList publicationId={publicationId} rows={rows} />
+          )}
         </div>
-      </header>
-
-      {visibleEntries.length === 0 ? (
-        <EmptyState
-          icon={<FileText className="size-5" />}
-          title="No posts yet"
-          description="This publication hasn't published any posts. Check back later."
-        />
-      ) : (
-        <ul className="grid gap-4">
-          {visibleEntries.map((entry) => (
-            <li key={entry.id}>
-              <PublicEntryCard
-                entry={entry}
-                publicationId={publicationId}
-                premium={classifyEntry(entry) === "premium"}
-              />
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+      </section>
+    </>
   );
 }
 
@@ -98,10 +80,10 @@ export async function generateMetadata({
   const { publicationId } = await params;
   const data = await loadPublicBlog(publicationId);
   if (!data) {
-    return { title: "Publication not found - morse blog" };
+    return { title: "Publication not found" };
   }
   return {
-    title: `${data.publication.name} - morse blog`,
-    description: `A morse publication. Read posts stored on Walrus.`,
+    title: data.publication.name,
+    description: "A public blog on Sui testnet, stored on Walrus.",
   };
 }

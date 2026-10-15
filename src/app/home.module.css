@@ -1,0 +1,201 @@
+/* Home, from .hero / .feats / .howdemo in redesign/blog.css. */
+.hero {
+  position: relative;
+  overflow: hidden;
+}
+.heroInner {
+  padding: 84px var(--gutter) 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+}
+.hero h1 {
+  max-width: 900px;
+  font-family: var(--disp);
+  font-size: clamp(44px, 6.4vw, 84px);
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+}
+.hero h1 em {
+  font-style: normal;
+  color: var(--ultra);
+}
+.lede {
+  font-size: 19px;
+  color: var(--body);
+  max-width: 620px;
+}
+.lede code {
+  font-size: 0.9em;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 1px 6px;
+}
+.cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 6px;
+}
+.txt {
+  font-weight: 600;
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px;
+  min-height: 46px;
+  border-radius: 999px;
+}
+.txt:focus-visible {
+  outline: 2px solid var(--ultra);
+  outline-offset: 2px;
+}
+
+.wire {
+  display: block;
+  width: 100%;
+  height: 56px;
+  margin-top: 8px;
+}
+.wireLine {
+  stroke: var(--line);
+}
+.nodes {
+  fill: var(--ultra);
+}
+/* Same travel as the reference SMIL animateTransform (translate -160 to 1100
+   over 7s), in CSS so reduced-motion users get a still signal. */
+.pulse {
+  stroke: var(--ultra);
+  animation: travel 7s linear infinite;
+}
+@keyframes travel {
+  from {
+    transform: translateX(-160px);
+  }
+  to {
+    transform: translateX(1100px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pulse {
+    animation: none;
+    transform: translateX(240px);
+  }
+}
+
+.feats {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+}
+.featsInner {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 0 var(--gutter);
+}
+.feat {
+  padding: 34px 26px 34px 0;
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.feat + .feat {
+  padding-left: 26px;
+}
+.feat:last-child {
+  border-right: 0;
+  padding-right: 0;
+}
+.feat svg {
+  color: var(--ultra);
+}
+.feat h2 {
+  font-family: var(--disp);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.feat p {
+  font-size: 15px;
+  color: var(--body);
+}
+
+.howInner {
+  padding: 72px var(--gutter) 88px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.howInner h2 {
+  font-family: var(--disp);
+  font-size: 34px;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+  line-height: 1.05;
+}
+.steps {
+  list-style: none;
+  /* The reference never resets the browser's default <ol> margin. */
+  margin: 1em 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+.steps li {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+  min-width: 0;
+}
+.stepNumber {
+  font-family: var(--disp);
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--ultra);
+}
+.steps strong {
+  font-size: 16px;
+  font-weight: 600;
+}
+.steps li > span {
+  font-size: 14px;
+  color: var(--body);
+}
+.testnetNote {
+  font-size: 13.5px;
+  color: var(--stone);
+}
+
+@media (max-width: 860px) {
+  .featsInner {
+    grid-template-columns: 1fr;
+  }
+  .feat,
+  .feat + .feat {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    padding: 24px 0;
+  }
+  .feat:last-child {
+    border-bottom: 0;
+  }
+  .steps {
+    grid-template-columns: 1fr;
+  }
+  .cta :global(.btn) {
+    width: 100%;
+  }
+}
