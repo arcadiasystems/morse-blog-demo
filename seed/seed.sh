@@ -32,7 +32,7 @@ publish() { # publish <entry-name> <file>
   morse entry add "$1" --file "$2" --content-type text/markdown --epochs "$EPOCHS"
 }
 
-publish "Welcome — this blog has no backend"        posts/01-welcome.md
+publish "Welcome, this blog has no backend"        posts/01-welcome.md
 publish "Why your CMS should be a protocol"         posts/02-cms-as-protocol.md
 publish "How revisions work: the dual-head model"   posts/03-revisions.md
 publish "Publishing from an AI agent"               posts/04-agents.md

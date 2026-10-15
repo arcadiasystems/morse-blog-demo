@@ -160,7 +160,7 @@ export function RevisionViewer({
             </div>
           ) : !isText ? (
             <div className="rounded-lg border border-border/60 bg-muted/30 px-4 py-8 text-center text-sm text-muted-foreground">
-              Binary content ({contentType}) - no inline preview.
+              Binary content ({contentType}), no inline preview.
             </div>
           ) : loading ? (
             <div className="flex flex-col gap-2">

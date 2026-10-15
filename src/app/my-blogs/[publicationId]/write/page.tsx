@@ -259,7 +259,7 @@ export default function WritePostPage({
             {WALRUS_STORAGE_EPOCHS} epochs
           </span>{" "}
           (~{WALRUS_STORAGE_EPOCHS} days on testnet). After that the storage
-          lease expires and the content is removed - blobs are not permanent.
+          lease expires and the content is removed. Blobs are not permanent.
           This demo uses a fixed duration to keep things simple; a real app
           would let you choose how long to store each post (longer costs more
           WAL). Also keep posts under ~5 MB for reliable testnet uploads.
@@ -397,7 +397,7 @@ export default function WritePostPage({
                     <TooltipContent side="left" className="max-w-xs">
                       Encrypts the body client-side with Seal. Only wallets
                       that hold a publisher cap on this publication can unlock
-                      and read it. Premium posts have no public revision - the
+                      and read it. Premium posts have no public revision: the
                       encrypted draft IS the visible version (no separate
                       publish step).
                     </TooltipContent>

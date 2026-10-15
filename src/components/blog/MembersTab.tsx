@@ -191,7 +191,7 @@ export function MembersTab({ publicationId }: { publicationId: string }) {
         <AlertTitle className="text-sm">Local cap history</AlertTitle>
         <AlertDescription className="text-xs text-muted-foreground">
           Issued caps are tracked in this browser&apos;s storage. The on-chain
-          state is authoritative - a production tool would discover caps via
+          state is authoritative. A production tool would discover caps via
           an indexer.
         </AlertDescription>
       </Alert>
@@ -305,7 +305,7 @@ export function MembersTab({ publicationId }: { publicationId: string }) {
                         {truncateAddress(cap.holder)} will lose write access
                         immediately. Their existing posts stay on the
                         publication. They can no longer decrypt premium posts
-                        either - Seal verifies cap status on every decrypt.
+                        either: Seal verifies cap status on every decrypt.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

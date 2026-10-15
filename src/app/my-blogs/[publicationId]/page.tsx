@@ -214,7 +214,7 @@ export default function PublicationAdminPage({
             <EmptyState
               icon={<FileText className="size-5" />}
               title="Default collection missing"
-              description={`No "${DEFAULT_COLLECTION_NAME}" collection on this publication. It should be created automatically with the blog - try creating a new blog or contact support.`}
+              description={`No "${DEFAULT_COLLECTION_NAME}" collection on this publication. It should be created automatically with the blog. Try creating a new blog or contact support.`}
             />
           ) : entries.isPending ? (
             <div className="flex flex-col gap-2">
@@ -258,7 +258,7 @@ export default function PublicationAdminPage({
           <div className="flex flex-col gap-0.5">
             <h2 className="text-sm font-semibold">Drafts & premium</h2>
             <p className="text-xs text-muted-foreground">
-              Posts with unpublished edits, plus premium (encrypted) posts -
+              Posts with unpublished edits, plus premium (encrypted) posts,
               which stay here permanently because encrypted entries have no
               public-publish path.
             </p>

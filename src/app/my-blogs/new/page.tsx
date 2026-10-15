@@ -149,7 +149,7 @@ export default function NewBlogPage() {
           id="name"
           label="Name"
           required
-          help="Shows in the header and your public blog index. Permanent once created - the SDK has no rename op."
+          help="Shows in the header and your public blog index. Permanent once created. The SDK has no rename op."
           error={nameError}
         >
           <Input

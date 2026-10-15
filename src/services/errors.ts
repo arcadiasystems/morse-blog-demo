@@ -130,7 +130,7 @@ function mapTransportError(err: TransportError): MappedError {
   if (op?.startsWith("walrus.aggregator.")) {
     return {
       title: "Walrus aggregator unavailable",
-      body: `The aggregator couldn't return the blob${opTag}. Fresh blobs can take ~30s to propagate on testnet - retry shortly.`,
+      body: `The aggregator couldn't return the blob${opTag}. Fresh blobs can take ~30s to propagate on testnet. Retry shortly.`,
       severity: "warning",
     };
   }
@@ -205,7 +205,7 @@ export function mapSdkError(err: unknown): MappedError {
     if (err.resource === "blob") {
       return {
         title: "Walrus blob unavailable",
-        body: "The aggregator does not have this blob. If it was just uploaded, wait ~30s for testnet propagation and retry. Otherwise its storage lease has expired (Walrus blobs are not permanent) - open the post and re-save to restore it with a fresh blob.",
+        body: "The aggregator does not have this blob. If it was just uploaded, wait ~30s for testnet propagation and retry. Otherwise its storage lease has expired (Walrus blobs are not permanent). Open the post and re-save to restore it with a fresh blob.",
         severity: "warning",
       };
     }

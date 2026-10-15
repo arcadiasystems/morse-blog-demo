@@ -332,7 +332,7 @@ export default function EditPostPage({
     if (dr.blobRef.kind !== "blob") {
       toast.error("Quilt-backed drafts not supported here", {
         description:
-          "This demo only publishes single-blob revisions. The current draft references a Walrus quilt patch - use the SDK's quilt-aware publishFromDraft path directly to ship it.",
+          "This demo only publishes single-blob revisions. The current draft references a Walrus quilt patch. Use the SDK's quilt-aware publishFromDraft path directly to ship it.",
       });
       return;
     }
@@ -518,11 +518,11 @@ export default function EditPostPage({
         </h1>
         <p className="text-sm text-muted-foreground">
           {blobMissing
-            ? "Re-writing this post from scratch - the original body expired on Walrus and is unrecoverable. New content is stored for ~50 epochs."
+            ? "Re-writing this post from scratch. The original body expired on Walrus and is unrecoverable. New content is stored for ~50 epochs."
             : isPremium
-              ? "Premium posts are encrypted client-side. The current draft is the visible version - no separate publish step."
+              ? "Premium posts are encrypted client-side. The current draft is the visible version, with no separate publish step."
               : isBinaryEntry
-                ? `Binary entry (${entryContentType}). Body is a file, not markdown - preview below. Delete to replace, since names are immutable.`
+                ? `Binary entry (${entryContentType}). Body is a file, not markdown. Preview below. Delete to replace, since names are immutable.`
                 : "Title is immutable once the entry is created. Edit the body below and save a draft, then publish to make the new revision public."}
         </p>
       </div>
@@ -534,7 +534,7 @@ export default function EditPostPage({
             Re-authoring expired content
           </AlertTitle>
           <AlertDescription className="text-xs text-muted-foreground">
-            The original body is gone from Walrus and cannot be recovered - this
+            The original body is gone from Walrus and cannot be recovered. This
             is a fresh write. Type the content, then{" "}
             <span className="text-foreground font-medium">Save draft</span> and
             Publish to replace the dead revision with a new blob stored for ~50
@@ -562,7 +562,7 @@ export default function EditPostPage({
         </AlertTitle>
         <AlertDescription className="text-xs text-muted-foreground">
           {isPremium
-            ? "There is no public-publish path for encrypted content - the Move contract hardcodes encrypted=false on publish. So a premium post never gets a public revision; its encrypted draft IS what cap holders read. Each save appends a new encrypted revision under the same sealId. To make this content fully public, copy it into a new non-premium post."
+            ? "There is no public-publish path for encrypted content: the Move contract hardcodes encrypted=false on publish. So a premium post never gets a public revision; its encrypted draft IS what cap holders read. Each save appends a new encrypted revision under the same sealId. To make this content fully public, copy it into a new non-premium post."
             : isBinaryEntry
               ? "This is a binary entry created via the Media tab uploader. To replace, delete and re-upload (existing posts that reference this image will still point to the old, deleted entry)."
               : "Every save creates a new revision on-chain. The previous public revision stays in history forever. There is no in-place edit."}
@@ -584,7 +584,7 @@ export default function EditPostPage({
                 </div>
               ) : (
                 <div className="rounded-lg border border-border/60 bg-muted/30 px-4 py-10 grid place-items-center text-center text-sm text-muted-foreground">
-                  Binary file ({entryContentType}). No inline preview - use
+                  Binary file ({entryContentType}). No inline preview. Use
                   the public URL or the Media tab to view.
                 </div>
               )}
@@ -841,7 +841,7 @@ export default function EditPostPage({
                   {!canPublish ? (
                     <TooltipContent side="top" className="max-w-xs">
                       {!pendingDraft
-                        ? "Nothing to publish - the public revision is already up to date. Edit the body and Save draft to create something to publish."
+                        ? "Nothing to publish. The public revision is already up to date. Edit the body and Save draft to create something to publish."
                         : "Wait for the current operation to finish."}
                     </TooltipContent>
                   ) : null}
