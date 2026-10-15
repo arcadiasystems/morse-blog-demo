@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import {
   useConnectWallet,
   useCurrentAccount,
@@ -9,16 +10,8 @@ import {
   useDisconnectWallet,
   useWallets,
 } from "@mysten/dapp-kit";
-import {
-  Check,
-  ChevronDown,
-  Copy,
-  Loader2,
-  LogOut,
-  Wallet,
-} from "lucide-react";
+import { Check, Copy, ExternalLink, Loader2, LogOut } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -35,11 +28,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { WalletIcon } from "@/components/brand/icons";
+import { WalletBalances } from "@/components/layout/WalletBalances";
+import { usePublisherCap } from "@/hooks/use-publisher-cap";
+import { suiscanAccountUrl } from "@/lib/explorer";
 import { truncateAddress } from "@/utils/address";
+import styles from "./WalletButton.module.css";
 
 type Props = {
+  /** `sm` is the top-bar size, `lg` the hero size. */
   size?: "sm" | "default" | "lg";
   className?: string;
+};
+
+const SIZE_CLASS: Record<NonNullable<Props["size"]>, string> = {
+  sm: "sm",
+  default: "",
+  lg: "lg",
 };
 
 export function WalletButton({ size = "default", className }: Props) {
@@ -50,6 +55,10 @@ export function WalletButton({ size = "default", className }: Props) {
   const disconnect = useDisconnectWallet();
   const router = useRouter();
   const pathname = usePathname();
+  // Publication routes (`/[publicationId]`, `/my-blogs/[publicationId]`)
+  // label the pill with the wallet's capability on that publication.
+  const { publicationId } = useParams<{ publicationId?: string }>();
+  const publisherCap = usePublisherCap(account ? publicationId : undefined);
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -61,106 +70,111 @@ export function WalletButton({ size = "default", className }: Props) {
       setTimeout(() => setCopied(false), 1500);
     };
 
+    const onDisconnect = () => {
+      disconnect.mutate(undefined, {
+        onSuccess: () => toast.message("Wallet disconnected"),
+      });
+    };
+
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            size={size}
-            className={`gap-2 font-mono text-xs border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 ${className ?? ""}`}
+      <div className={`${styles.wallet} ${className ?? ""}`}>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            className={styles.trigger}
+            aria-label={`Wallet ${truncateAddress(account.address)}, open menu`}
           >
-            <span className="grid place-items-center size-5 rounded-sm bg-primary/15 overflow-hidden">
-              {currentWallet?.icon ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={currentWallet.icon}
-                  alt=""
-                  className="size-5 object-cover"
-                />
+            <i aria-hidden="true" />
+            <b>{truncateAddress(account.address)}</b>
+            {publisherCap.data ? (
+              <span className={styles.caps}>publisher cap</span>
+            ) : null}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[264px]">
+            <DropdownMenuLabel className="font-normal">
+              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                Connected
+              </p>
+              <p className="text-sm font-medium mt-0.5">
+                {currentWallet?.name ?? "Wallet"}
+              </p>
+              <p className="text-[11px] text-muted-foreground font-mono mt-1">
+                {truncateAddress(account.address, 10, 8)}
+              </p>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <WalletBalances />
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/my-blogs">My blogs</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onCopy}>
+              {copied ? (
+                <Check className="size-3.5 text-primary" />
               ) : (
-                <Wallet className="size-3 text-primary" />
+                <Copy className="size-3.5" />
               )}
-            </span>
-            <span className="text-foreground">
-              {truncateAddress(account.address)}
-            </span>
-            <ChevronDown className="size-3.5 opacity-60" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-60">
-          <DropdownMenuLabel className="font-normal">
-            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-              Connected
-            </p>
-            <p className="text-sm font-medium mt-0.5">
-              {currentWallet?.name ?? "Wallet"}
-            </p>
-            <p className="text-[11px] text-muted-foreground font-mono mt-1">
-              {truncateAddress(account.address, 10, 8)}
-            </p>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={onCopy}>
-            {copied ? (
-              <Check className="size-3.5 text-primary" />
-            ) : (
-              <Copy className="size-3.5" />
-            )}
-            <span>{copied ? "Copied" : "Copy address"}</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => {
-              disconnect.mutate(undefined, {
-                onSuccess: () => toast.message("Wallet disconnected"),
-              });
-            }}
-            className="text-destructive focus:text-destructive"
-          >
-            <LogOut className="size-3.5" />
-            Disconnect
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+              <span>{copied ? "Copied" : "Copy address"}</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a
+                href={suiscanAccountUrl(account.address)}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <ExternalLink className="size-3.5" />
+                View on Suiscan
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem variant="destructive" onClick={onDisconnect}>
+              <LogOut className="size-3.5" />
+              Disconnect
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <button
+          type="button"
+          className={styles.disconnect}
+          onClick={onDisconnect}
+        >
+          Disconnect
+        </button>
+      </div>
     );
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size={size} className={`gap-2 ${className ?? ""}`}>
-          <Wallet className="size-4" />
+        <button
+          type="button"
+          className={`btn btn-ultra ${SIZE_CLASS[size]} ${className ?? ""}`}
+        >
+          <WalletIcon size={size === "lg" ? 18 : 16} />
           Connect wallet
-        </Button>
+        </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md rounded-[20px] bg-paper">
         <DialogHeader>
-          <DialogTitle>Connect a wallet</DialogTitle>
+          <DialogTitle className="font-heading text-2xl font-bold tracking-tight">
+            Connect a wallet
+          </DialogTitle>
           <DialogDescription>
             Choose a Sui wallet to continue. Make sure it&apos;s set to{" "}
             <span className="text-foreground font-medium">Sui Testnet</span>.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col gap-2 mt-2">
+        <div className={styles.walletList}>
           {wallets.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-border/70 p-6 text-center text-sm text-muted-foreground">
+            <div className={styles.noWallets}>
               <p>No Sui wallets detected in this browser.</p>
               <p className="mt-2">
                 Install{" "}
-                <a
-                  className="text-primary hover:underline"
-                  href="https://slush.app/"
-                  target="_blank"
-                  rel="noreferrer"
-                >
+                <a href="https://slush.app/" target="_blank" rel="noreferrer">
                   Slush
                 </a>{" "}
                 or{" "}
-                <a
-                  className="text-primary hover:underline"
-                  href="https://suiet.app/"
-                  target="_blank"
-                  rel="noreferrer"
-                >
+                <a href="https://suiet.app/" target="_blank" rel="noreferrer">
                   Suiet
                 </a>{" "}
                 to continue.
@@ -173,6 +187,7 @@ export function WalletButton({ size = "default", className }: Props) {
                 connect.variables?.wallet?.name === wallet.name;
               return (
                 <button
+                  type="button"
                   key={wallet.name}
                   onClick={() => {
                     connect.mutate(
@@ -203,30 +218,21 @@ export function WalletButton({ size = "default", className }: Props) {
                     );
                   }}
                   disabled={connect.isPending}
-                  className="flex items-center gap-3 rounded-lg border border-border/60 px-3 py-2.5 hover:border-primary/40 hover:bg-accent/40 transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed group"
+                  className={styles.walletOption}
                 >
-                  <span className="grid place-items-center size-9 rounded-md bg-muted overflow-hidden shrink-0">
-                    {wallet.icon ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={wallet.icon}
-                        alt=""
-                        className="size-9 object-cover"
-                      />
-                    ) : (
-                      <Wallet className="size-4 text-muted-foreground" />
-                    )}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {wallet.name}
-                    </p>
-                  </div>
-                  {isConnecting ? (
-                    <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                  {wallet.icon ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={wallet.icon} alt="" />
                   ) : (
-                    <ChevronDown className="size-4 -rotate-90 opacity-0 group-hover:opacity-60 transition-opacity" />
+                    <WalletIcon size={20} />
                   )}
+                  <span className="flex-1 min-w-0 truncate">{wallet.name}</span>
+                  {isConnecting ? (
+                    <Loader2
+                      className="size-4 animate-spin text-muted-foreground"
+                      aria-label="Connecting"
+                    />
+                  ) : null}
                 </button>
               );
             })

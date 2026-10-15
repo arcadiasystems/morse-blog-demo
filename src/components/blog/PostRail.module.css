@@ -1,0 +1,141 @@
+/* On-chain record and revisions rail, from .rail / .record / .revs in
+   redesign/blog.css. */
+.rail {
+  position: sticky;
+  top: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.record,
+.revs {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.hd {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+}
+/* Matches the reference cascade, where this rule also restyles the
+   "Anchored" chip's text. */
+.hd span,
+.hd h2 {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--stone);
+}
+
+.record dl {
+  margin: 0;
+  padding: 6px 18px 10px;
+  display: flex;
+  flex-direction: column;
+}
+.record dt {
+  font-size: 12px;
+  color: var(--stone);
+  margin-top: 12px;
+}
+.record dd {
+  margin: 2px 0 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  word-break: break-all;
+}
+.record dd a,
+.rev a {
+  color: var(--ultra);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.record dd a:focus-visible,
+.rev a:focus-visible {
+  outline: 2px solid var(--ultra);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+.record dd.t {
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+}
+.record dd.unavailable {
+  font-family: var(--sans);
+  font-size: 14px;
+  color: var(--stone);
+}
+
+.ft {
+  padding: 12px 18px 16px;
+  border-top: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--stone);
+  line-height: 1.5;
+}
+
+.revs .hd {
+  display: block;
+}
+.revList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.rev {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+.rev:last-child {
+  border-bottom: 0;
+}
+.v {
+  font-family: var(--mono);
+  font-weight: 500;
+}
+.d {
+  color: var(--stone);
+}
+.cur {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  background: var(--ultra);
+  color: #fff;
+  border-radius: 999px;
+  padding: 3px 7px;
+}
+.rev a {
+  font-size: 12.5px;
+}
+.reading {
+  font-size: 12.5px;
+  color: var(--stone);
+}
+
+.railnote {
+  font-size: 12.5px;
+  color: var(--stone);
+  padding: 0 6px;
+  line-height: 1.5;
+}
+
+@media (max-width: 860px) {
+  .rail {
+    position: static;
+  }
+}

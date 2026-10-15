@@ -1,0 +1,106 @@
+/* Top bar, from .top / .brand / .chip.net in redesign/blog.css. */
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(242, 239, 232, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+
+.bar {
+  height: 66px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+}
+.brand span {
+  font-family: var(--disp);
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+.brand em {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--stone);
+  margin-left: 4px;
+  padding-left: 12px;
+  border-left: 1px solid var(--line-2);
+}
+.brand:focus-visible {
+  outline: 2px solid var(--ultra);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+.net {
+  border: 1px solid var(--line-2);
+  color: var(--body);
+  background: var(--paper);
+  white-space: nowrap;
+}
+.net i {
+  background: var(--ultra);
+}
+.net b {
+  color: var(--ultra);
+  font-weight: 500;
+}
+.off {
+  color: var(--stone);
+  padding-left: 8px;
+  border-left: 1px solid var(--line);
+}
+
+.right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lnk {
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--body);
+  padding: 0 12px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+}
+.lnk[aria-current="page"] {
+  color: var(--ink);
+}
+.lnk:focus-visible {
+  outline: 2px solid var(--ultra);
+  outline-offset: 2px;
+}
+
+@media (max-width: 860px) {
+  .brand em,
+  .lnk,
+  .off {
+    display: none;
+  }
+  .bar {
+    gap: 10px;
+  }
+  .brand {
+    flex: 0 0 auto;
+  }
+  .right {
+    min-width: 0;
+  }
+}

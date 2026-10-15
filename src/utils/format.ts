@@ -44,3 +44,39 @@ export function formatCoinBalance(
   if (n < 1_000_000_000) return `${nf(2).format(n / 1_000_000)}M`;
   return `${nf(2).format(n / 1_000_000_000)}B`;
 }
+
+// Chain timestamps render in UTC so server output never depends on the host
+// timezone. en-US parts give three-letter months ("Sep", not en-GB "Sept"),
+// assembled day-first to match the identity: "4 Oct 2026".
+const DATE_PARTS = new Intl.DateTimeFormat("en-US", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+const TIME_PARTS = new Intl.DateTimeFormat("en-US", {
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+  timeZone: "UTC",
+});
+
+function part(
+  parts: Intl.DateTimeFormatPart[],
+  type: Intl.DateTimeFormatPartTypes,
+): string {
+  return parts.find((p) => p.type === type)?.value ?? "";
+}
+
+/** "4 Oct 2026" */
+export function formatChainDate(timestampMs: number): string {
+  const parts = DATE_PARTS.formatToParts(timestampMs);
+  return `${part(parts, "day")} ${part(parts, "month")} ${part(parts, "year")}`;
+}
+
+/** "4 Oct 2026, 14:12 UTC" */
+export function formatChainDateTime(timestampMs: number): string {
+  const time = TIME_PARTS.formatToParts(timestampMs);
+  return `${formatChainDate(timestampMs)}, ${part(time, "hour")}:${part(time, "minute")} UTC`;
+}

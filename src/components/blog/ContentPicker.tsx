@@ -132,7 +132,7 @@ export function ContentPicker({
             <p className="mt-3 text-[11px] text-muted-foreground flex items-center gap-1.5">
               <Lock className="size-3" />
               {entries.data.length - linkable.length} entries hidden (drafts
-              or premium - not linkable from public posts)
+              or premium, not linkable from public posts)
             </p>
           ) : null}
         </div>

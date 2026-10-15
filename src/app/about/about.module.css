@@ -1,0 +1,33 @@
+/* About, from .about in redesign/blog.css. */
+.inner {
+  padding: 64px var(--gutter) 88px;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.inner h1 {
+  font-family: var(--disp);
+  font-size: 44px;
+  letter-spacing: -0.035em;
+  font-weight: 800;
+  line-height: 1.02;
+}
+.inner p {
+  font-size: 18px;
+  color: var(--body);
+}
+.inner code {
+  font-size: 0.9em;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 1px 6px;
+  color: var(--ink);
+}
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}

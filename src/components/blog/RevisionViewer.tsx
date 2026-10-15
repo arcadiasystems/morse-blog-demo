@@ -116,7 +116,7 @@ export function RevisionViewer({
             {isDraftHead ? (
               <Badge
                 variant="outline"
-                className="border-amber-400/40 bg-amber-400/10 text-amber-300 text-[10px]"
+                className="border-warn-line bg-warn-bg text-warn text-[10px]"
               >
                 Draft
               </Badge>
@@ -145,7 +145,7 @@ export function RevisionViewer({
 
         <div className="mt-2">
           {isEncrypted ? (
-            <div className="rounded-lg border border-amber-400/30 bg-amber-400/5 px-4 py-8 text-center text-sm text-muted-foreground">
+            <div className="rounded-lg border border-warn-line bg-warn-bg px-4 py-8 text-center text-sm text-muted-foreground">
               This revision is encrypted. Open the edit page and use the
               decrypt flow to view its body.
             </div>
@@ -160,7 +160,7 @@ export function RevisionViewer({
             </div>
           ) : !isText ? (
             <div className="rounded-lg border border-border/60 bg-muted/30 px-4 py-8 text-center text-sm text-muted-foreground">
-              Binary content ({contentType}) - no inline preview.
+              Binary content ({contentType}), no inline preview.
             </div>
           ) : loading ? (
             <div className="flex flex-col gap-2">
@@ -170,7 +170,7 @@ export function RevisionViewer({
               <Skeleton className="h-4 w-4/6" />
             </div>
           ) : error ? (
-            <div className="rounded-lg border border-amber-400/40 bg-amber-400/5 px-4 py-6 text-sm text-muted-foreground text-center">
+            <div className="rounded-lg border border-warn-line bg-warn-bg px-4 py-6 text-sm text-muted-foreground text-center">
               {(() => {
                 const m = mapSdkError(error);
                 return (

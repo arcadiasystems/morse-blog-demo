@@ -38,7 +38,7 @@ export function PublicationCard({
           {shared ? (
             <Badge
               variant="outline"
-              className="gap-1 border-amber-400/40 bg-amber-400/10 text-amber-300 text-[10px] shrink-0"
+              className="gap-1 border-warn-line bg-warn-bg text-warn text-[10px] shrink-0"
             >
               <Users className="size-2.5" />
               Co-author

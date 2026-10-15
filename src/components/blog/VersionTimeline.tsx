@@ -43,7 +43,7 @@ export function VersionTimeline({ entry, onCopyToEditor }: Props) {
                   {isPublic ? (
                     <CheckCircle2 className="size-4 text-primary shrink-0" />
                   ) : isDraft ? (
-                    <PencilLine className="size-4 text-amber-300 shrink-0" />
+                    <PencilLine className="size-4 text-warn shrink-0" />
                   ) : (
                     <Circle className="size-4 text-muted-foreground shrink-0" />
                   )}
@@ -73,7 +73,7 @@ export function VersionTimeline({ entry, onCopyToEditor }: Props) {
                     {isDraft ? (
                       <Badge
                         variant="outline"
-                        className="border-amber-400/40 bg-amber-400/10 text-amber-300 text-[10px]"
+                        className="border-warn-line bg-warn-bg text-warn text-[10px]"
                       >
                         Draft
                       </Badge>

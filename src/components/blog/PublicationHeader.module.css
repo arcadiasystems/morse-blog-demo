@@ -1,0 +1,78 @@
+/* Publication header, from .pubhead / .pubcard in redesign/blog.css. */
+.inner {
+  padding: 44px var(--gutter) 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.back {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--body);
+  min-height: 40px;
+  border-radius: 999px;
+}
+.back:focus-visible {
+  outline: 2px solid var(--ultra);
+  outline-offset: 2px;
+}
+
+.pubcard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--paper);
+}
+.pubcard h1 {
+  margin-top: 12px;
+  font-family: var(--disp);
+  font-size: clamp(34px, 4.4vw, 54px);
+  letter-spacing: -0.035em;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.ids {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--stone);
+  margin-top: 12px;
+}
+.ids b {
+  font-weight: 500;
+  color: var(--ink);
+}
+.ids a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ids a:focus-visible {
+  outline: 2px solid var(--ultra);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.act {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 860px) {
+  .pubcard {
+    padding: 22px;
+  }
+}

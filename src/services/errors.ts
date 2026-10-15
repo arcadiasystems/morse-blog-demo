@@ -130,7 +130,7 @@ function mapTransportError(err: TransportError): MappedError {
   if (op?.startsWith("walrus.aggregator.")) {
     return {
       title: "Walrus aggregator unavailable",
-      body: `The aggregator couldn't return the blob${opTag}. Fresh blobs can take ~30s to propagate on testnet - retry shortly.`,
+      body: `The aggregator couldn't return the blob${opTag}. Fresh blobs can take ~30s to propagate on testnet. Retry shortly.`,
       severity: "warning",
     };
   }
@@ -205,7 +205,7 @@ export function mapSdkError(err: unknown): MappedError {
     if (err.resource === "blob") {
       return {
         title: "Walrus blob unavailable",
-        body: "The aggregator does not have this blob. If it was just uploaded, wait ~30s for testnet propagation and retry. Otherwise its storage lease has expired (Walrus blobs are not permanent) - open the post and re-save to restore it with a fresh blob.",
+        body: "The aggregator does not have this blob. If it was just uploaded, wait ~30s for testnet propagation and retry. Otherwise its storage lease has expired (Walrus blobs are not permanent). Open the post and re-save to restore it with a fresh blob.",
         severity: "warning",
       };
     }
@@ -275,4 +275,17 @@ export function mapSdkError(err: unknown): MappedError {
     body: String(err),
     severity: "error",
   };
+}
+
+/**
+ * True when an error came from fetching a blob's bytes from Walrus (the
+ * aggregator failed, or the blob is gone), as opposed to wallet, Seal or
+ * contract failures. Readers get a retry state for these instead of a toast.
+ */
+export function isWalrusReadFailure(err: unknown): boolean {
+  if (err instanceof NotFoundError) return err.resource === "blob";
+  if (err instanceof TransportError) {
+    return err.operation?.startsWith("walrus.aggregator.") ?? false;
+  }
+  return false;
 }

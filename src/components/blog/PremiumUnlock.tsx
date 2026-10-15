@@ -1,37 +1,67 @@
 "use client";
 
 import { useState } from "react";
-import { Lock, Unlock } from "lucide-react";
 import { toast } from "sonner";
 import { useCurrentAccount } from "@mysten/dapp-kit";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { EmptyState } from "@/components/feedback/EmptyState";
-import { StatusIndicator } from "@/components/feedback/StatusIndicator";
+import { LockIcon } from "@/components/brand/icons";
+import { StateCard } from "@/components/feedback/StateCard";
+import { RevisionLoadError } from "@/components/feedback/RevisionLoadError";
 import { MarkdownRenderer } from "@/components/blog/MarkdownRenderer";
+import { SignToDecryptDialog } from "@/components/blog/SignToDecryptDialog";
 import { WalletButton } from "@/components/layout/WalletButton";
 import { DEFAULT_COLLECTION_NAME } from "@/lib/morse-config";
 import { useEntries } from "@/hooks/use-entries";
 import { usePublisherCap } from "@/hooks/use-publisher-cap";
-import { useUnlockEntry } from "@/hooks/use-unlock-entry";
-import { mapSdkError } from "@/services/errors";
+import { useUnlockEntry, type UnlockPhase } from "@/hooks/use-unlock-entry";
+import { isWalrusReadFailure, mapSdkError } from "@/services/errors";
+import styles from "./PremiumUnlock.module.css";
 
 type Props = {
   publicationId: string;
   entryId: number;
   collectionName?: string;
+  /** 1-based number of the encrypted revision, for the load-error copy. */
+  revisionNumber: number;
+  /** Aggregator URL of the encrypted blob, for the load-error state. */
+  blobHref: string;
+  className?: string;
+};
+
+/**
+ * Shape-only text behind the lock. Never the ciphertext, never the body:
+ * the real post is fetched and decrypted only after the reader signs.
+ */
+const PLACEHOLDER_PARAGRAPHS = [
+  "Lorem ipsum is not used here; this text is only a shape. The body of a premium post is encrypted client-side before it reaches Walrus, so the bytes on the network are unreadable without a key.",
+  "Readers who hold the right capability sign one message and the Seal key server releases the decryption key. The decrypted text never touches a Morse server because there is no Morse server.",
+  "What follows is the playbook itself, section by section, with the numbers from the first three launches.",
+  "The first rule is to publish the terms before the raise, not after. The second is to anchor the roadmap the day it is announced. The third is to never edit in place.",
+];
+
+const NO_WALLET_NOTE =
+  "No wallet? The public posts on this blog need nothing. The encrypted bytes are still on Walrus and the record is still on Sui; only the key is gated.";
+
+const PENDING_LABEL: Record<UnlockPhase, string> = {
+  idle: "Unlocking",
+  "signing-session": "Waiting for your signature",
+  "fetching-blob": "Fetching from Walrus",
+  decrypting: "Decrypting",
+  done: "Decrypting",
 };
 
 /**
  * Client-side unlock surface for premium entries. The public post page
- * server-renders the metadata + lock CTA; once the user clicks "Unlock", we
- * run SessionKey.create -> walrus read -> seal.decrypt and render markdown
- * inline.
+ * server-renders the metadata and record; this component gates the body:
+ * connect, confirm the signature, then SessionKey.create -> walrus read ->
+ * seal.decrypt, and render the Markdown inline.
  */
 export function PremiumUnlock({
   publicationId,
   entryId,
   collectionName = DEFAULT_COLLECTION_NAME,
+  revisionNumber,
+  blobHref,
+  className,
 }: Props) {
   const account = useCurrentAccount();
   const entries = useEntries(publicationId, collectionName);
@@ -39,100 +69,170 @@ export function PremiumUnlock({
   const cap = usePublisherCap(publicationId);
   const unlock = useUnlockEntry();
   const [plaintext, setPlaintext] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState(false);
+  const [fetchFailed, setFetchFailed] = useState(false);
 
-  if (!account) {
-    return (
-      <EmptyState
-        icon={<Lock className="size-5" />}
-        title="Connect to unlock"
-        description="This is an encrypted post. Connect a wallet that holds a publisher cap on this blog to decrypt and read."
-        action={<WalletButton size="lg" />}
-      />
-    );
-  }
-
-  if (entries.isPending || cap.isPending) {
-    return (
-      <div className="flex flex-col gap-3">
-        <Skeleton className="h-6 w-2/3" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-5/6" />
-        <Skeleton className="h-4 w-4/6" />
-      </div>
-    );
-  }
-
-  if (!entry) {
-    return (
-      <EmptyState
-        icon={<Lock className="size-5" />}
-        title="Entry not found"
-        description="This entry may have been deleted or the blog ID is wrong."
-      />
-    );
-  }
-
-  if (!cap.data) {
-    return (
-      <EmptyState
-        icon={<Lock className="size-5" />}
-        title="No access"
-        description="Your wallet does not hold a publisher cap on this blog. The blog owner can issue you one to grant decryption access."
-      />
-    );
-  }
-
-  if (plaintext !== null) {
-    return <MarkdownRenderer source={plaintext} />;
-  }
-
-  const onUnlock = async () => {
+  const runUnlock = async () => {
+    if (!entry || !cap.data) return;
+    setConfirming(false);
+    setFetchFailed(false);
     try {
       const text = await unlock.unlock({
         entry,
-        publisherCapId: cap.data!.id,
+        publisherCapId: cap.data.id,
       });
       setPlaintext(text);
       toast.success("Unlocked");
     } catch (err) {
+      if (isWalrusReadFailure(err)) {
+        setFetchFailed(true);
+        return;
+      }
       const m = mapSdkError(err);
       toast.error(m.title, { description: m.body });
     }
   };
 
+  if (plaintext !== null) {
+    return <MarkdownRenderer source={plaintext} className={className} />;
+  }
+
+  if (fetchFailed) {
+    return (
+      <RevisionLoadError
+        className={className}
+        revisionNumber={revisionNumber}
+        blobHref={blobHref}
+        onRetry={runUnlock}
+        retrying={unlock.isPending}
+      />
+    );
+  }
+
+  if (account && entries.isSuccess && !entry) {
+    return (
+      <StateCard
+        className={className}
+        icon={<LockIcon size={20} />}
+        title="Entry not found"
+      >
+        This entry may have been deleted or the blog ID is wrong.
+      </StateCard>
+    );
+  }
+
+  const access: Access = !account
+    ? "disconnected"
+    : entries.isPending || cap.isPending
+      ? "checking"
+      : cap.data
+        ? "granted"
+        : "denied";
+
   return (
-    <div className="flex flex-col items-center gap-4 rounded-xl border border-amber-400/30 bg-amber-400/5 px-6 py-10 text-center">
-      <div className="grid place-items-center size-12 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/40">
-        <Lock className="size-5" />
+    <div className={`${styles.lock} ${className ?? ""}`}>
+      <div className={styles.blur} aria-hidden="true">
+        {PLACEHOLDER_PARAGRAPHS.map((paragraph) => (
+          <p key={paragraph}>{paragraph}</p>
+        ))}
       </div>
-      <div className="flex flex-col gap-1">
-        <h3 className="text-base font-semibold">Premium post</h3>
-        <p className="text-sm text-muted-foreground max-w-md">
-          Encrypted client-side with Seal. Unlock signs one personal message
-          to derive a session key, then decrypts the body in your browser.
-        </p>
-      </div>
-      <div className="flex flex-col items-center gap-2">
-        {unlock.isPending ? (
-          <StatusIndicator
-            phase={
-              unlock.phase === "signing-session"
-                ? "signing-session"
-                : unlock.phase === "fetching-blob"
-                  ? "fetching-blob"
-                  : "decrypting"
+      <div className={styles.panel}>
+        <div className={styles.unlock}>
+          <UnlockCard
+            access={access}
+            pendingLabel={unlock.isPending ? PENDING_LABEL[unlock.phase] : null}
+            hasSessionKey={unlock.hasSessionKey}
+            onUnlock={() =>
+              unlock.hasSessionKey ? runUnlock() : setConfirming(true)
             }
           />
-        ) : null}
-        <Button
-          onClick={onUnlock}
-          disabled={unlock.isPending}
-          className="gap-2"
-        >
-          <Unlock className="size-4" />
-          {unlock.hasSessionKey ? "Decrypt" : "Unlock with wallet"}
-        </Button>
+        </div>
       </div>
+      <SignToDecryptDialog
+        open={confirming}
+        onOpenChange={setConfirming}
+        onSign={runUnlock}
+      />
     </div>
+  );
+}
+
+type Access = "disconnected" | "checking" | "denied" | "granted";
+
+function UnlockCard({
+  access,
+  pendingLabel,
+  hasSessionKey,
+  onUnlock,
+}: {
+  access: Access;
+  /** Progress label while an unlock runs; null when idle. */
+  pendingLabel: string | null;
+  hasSessionKey: boolean;
+  onUnlock: () => void;
+}) {
+  switch (access) {
+    case "disconnected":
+      return (
+        <>
+          <CardTitle>Connect to unlock</CardTitle>
+          <p>
+            This post is encrypted with Seal. Connect a wallet that holds a
+            publisher cap on this blog, sign one message, and it decrypts in
+            your browser.
+          </p>
+          <WalletButton />
+          <small>{NO_WALLET_NOTE}</small>
+        </>
+      );
+    case "checking":
+      return (
+        <>
+          <CardTitle>Checking your access</CardTitle>
+          <p>Looking up your publisher cap for this blog on Sui.</p>
+          <button type="button" className="btn btn-ultra" disabled>
+            Checking access
+          </button>
+        </>
+      );
+    case "denied":
+      return (
+        <>
+          <CardTitle>No access</CardTitle>
+          <p>
+            Your wallet does not hold a publisher cap on this blog. The blog
+            owner can issue you one to grant decryption access.
+          </p>
+          <small>{NO_WALLET_NOTE}</small>
+        </>
+      );
+    case "granted":
+      return (
+        <>
+          <CardTitle>Unlock this post</CardTitle>
+          <p>
+            This post is encrypted with Seal. Your wallet holds a publisher cap
+            on this blog. Sign one message and it decrypts in your browser.
+          </p>
+          <button
+            type="button"
+            className="btn btn-ultra"
+            disabled={pendingLabel !== null}
+            aria-live="polite"
+            onClick={onUnlock}
+          >
+            {pendingLabel ?? (hasSessionKey ? "Decrypt post" : "Unlock post")}
+          </button>
+        </>
+      );
+  }
+}
+
+function CardTitle({ children }: { children: string }) {
+  return (
+    <h2 className={styles.title}>
+      <LockIcon size={22} />
+      {children}
+    </h2>
   );
 }

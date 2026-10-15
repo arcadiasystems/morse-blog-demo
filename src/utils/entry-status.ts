@@ -17,6 +17,24 @@ export function classifyEntry(entry: Entry): EntryStatus {
 }
 
 /**
+ * The revision public readers see: the public head of a published post, or
+ * the encrypted draft head of a premium post. Null for plain drafts and empty
+ * entries, which are not public. Mirrors `classifyEntry`.
+ */
+export function readerHead(
+  entry: Entry,
+): { index: number; premium: boolean } | null {
+  if (entry.revisions.length === 0) return null;
+  if (entry.publicHead !== null) {
+    return { index: entry.publicHead, premium: false };
+  }
+  if (entry.draftHead !== null && entry.revisions[entry.draftHead]?.encrypted) {
+    return { index: entry.draftHead, premium: true };
+  }
+  return null;
+}
+
+/**
  * True when the entry has an unpublished draft that is *newer* than the
  * current public revision - i.e. edits that haven't been published yet.
  *

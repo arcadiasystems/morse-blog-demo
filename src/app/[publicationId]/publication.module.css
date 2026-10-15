@@ -1,0 +1,4 @@
+/* Post list section, from .posts in redesign/blog.css. */
+.posts {
+  padding: 0 var(--gutter) 88px;
+}

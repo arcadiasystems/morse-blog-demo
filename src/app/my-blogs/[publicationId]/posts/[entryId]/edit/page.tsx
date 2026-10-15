@@ -332,7 +332,7 @@ export default function EditPostPage({
     if (dr.blobRef.kind !== "blob") {
       toast.error("Quilt-backed drafts not supported here", {
         description:
-          "This demo only publishes single-blob revisions. The current draft references a Walrus quilt patch - use the SDK's quilt-aware publishFromDraft path directly to ship it.",
+          "This demo only publishes single-blob revisions. The current draft references a Walrus quilt patch. Use the SDK's quilt-aware publishFromDraft path directly to ship it.",
       });
       return;
     }
@@ -416,8 +416,8 @@ export default function EditPostPage({
           </h1>
         </div>
 
-        <div className="flex flex-col items-center gap-5 rounded-xl border border-amber-400/30 bg-amber-400/5 px-6 py-12 text-center">
-          <div className="grid place-items-center size-12 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/40">
+        <div className="flex flex-col items-center gap-5 rounded-xl border border-warn-line bg-warn-bg px-6 py-12 text-center">
+          <div className="grid place-items-center size-12 rounded-full bg-warn-bg text-warn border border-warn-line">
             <TriangleAlert className="size-5" />
           </div>
           <div className="flex flex-col gap-2 max-w-md">
@@ -487,7 +487,7 @@ export default function EditPostPage({
           {isPremium ? (
             <Badge
               variant="outline"
-              className="gap-1 border-amber-400/40 bg-amber-400/10 text-amber-300"
+              className="gap-1 border-warn-line bg-warn-bg text-warn"
             >
               <Lock className="size-3" />
               Premium
@@ -507,7 +507,7 @@ export default function EditPostPage({
           {!isPremium && pendingDraft ? (
             <Badge
               variant="outline"
-              className="border-amber-400/40 bg-amber-400/10 text-amber-300"
+              className="border-warn-line bg-warn-bg text-warn"
             >
               Draft pending publish
             </Badge>
@@ -518,23 +518,23 @@ export default function EditPostPage({
         </h1>
         <p className="text-sm text-muted-foreground">
           {blobMissing
-            ? "Re-writing this post from scratch - the original body expired on Walrus and is unrecoverable. New content is stored for ~50 epochs."
+            ? "Re-writing this post from scratch. The original body expired on Walrus and is unrecoverable. New content is stored for ~50 epochs."
             : isPremium
-              ? "Premium posts are encrypted client-side. The current draft is the visible version - no separate publish step."
+              ? "Premium posts are encrypted client-side. The current draft is the visible version, with no separate publish step."
               : isBinaryEntry
-                ? `Binary entry (${entryContentType}). Body is a file, not markdown - preview below. Delete to replace, since names are immutable.`
+                ? `Binary entry (${entryContentType}). Body is a file, not markdown. Preview below. Delete to replace, since names are immutable.`
                 : "Title is immutable once the entry is created. Edit the body below and save a draft, then publish to make the new revision public."}
         </p>
       </div>
 
       {blobMissing ? (
-        <Alert className="bg-amber-400/5 border-amber-400/40">
-          <TriangleAlert className="size-4 text-amber-300" />
+        <Alert className="bg-warn-bg border-warn-line">
+          <TriangleAlert className="size-4 text-warn" />
           <AlertTitle className="text-sm">
             Re-authoring expired content
           </AlertTitle>
           <AlertDescription className="text-xs text-muted-foreground">
-            The original body is gone from Walrus and cannot be recovered - this
+            The original body is gone from Walrus and cannot be recovered. This
             is a fresh write. Type the content, then{" "}
             <span className="text-foreground font-medium">Save draft</span> and
             Publish to replace the dead revision with a new blob stored for ~50
@@ -546,12 +546,12 @@ export default function EditPostPage({
       <Alert
         className={
           isPremium
-            ? "bg-amber-400/5 border-amber-400/30"
+            ? "bg-warn-bg border-warn-line"
             : "bg-card/40 border-border/60"
         }
       >
         {isPremium ? (
-          <Lock className="size-4 text-amber-300" />
+          <Lock className="size-4 text-warn" />
         ) : (
           <TriangleAlert className="size-4" />
         )}
@@ -562,7 +562,7 @@ export default function EditPostPage({
         </AlertTitle>
         <AlertDescription className="text-xs text-muted-foreground">
           {isPremium
-            ? "There is no public-publish path for encrypted content - the Move contract hardcodes encrypted=false on publish. So a premium post never gets a public revision; its encrypted draft IS what cap holders read. Each save appends a new encrypted revision under the same sealId. To make this content fully public, copy it into a new non-premium post."
+            ? "There is no public-publish path for encrypted content: the Move contract hardcodes encrypted=false on publish. So a premium post never gets a public revision; its encrypted draft IS what cap holders read. Each save appends a new encrypted revision under the same sealId. To make this content fully public, copy it into a new non-premium post."
             : isBinaryEntry
               ? "This is a binary entry created via the Media tab uploader. To replace, delete and re-upload (existing posts that reference this image will still point to the old, deleted entry)."
               : "Every save creates a new revision on-chain. The previous public revision stays in history forever. There is no in-place edit."}
@@ -584,7 +584,7 @@ export default function EditPostPage({
                 </div>
               ) : (
                 <div className="rounded-lg border border-border/60 bg-muted/30 px-4 py-10 grid place-items-center text-center text-sm text-muted-foreground">
-                  Binary file ({entryContentType}). No inline preview - use
+                  Binary file ({entryContentType}). No inline preview. Use
                   the public URL or the Media tab to view.
                 </div>
               )}
@@ -616,8 +616,8 @@ export default function EditPostPage({
               </div>
             </div>
           ) : isPremium && !decrypted ? (
-            <div className="flex flex-col items-center gap-4 rounded-xl border border-amber-400/30 bg-amber-400/5 px-6 py-10 text-center">
-              <div className="grid place-items-center size-12 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/40">
+            <div className="flex flex-col items-center gap-4 rounded-xl border border-warn-line bg-warn-bg px-6 py-10 text-center">
+              <div className="grid place-items-center size-12 rounded-full bg-warn-bg text-warn border border-warn-line">
                 <Lock className="size-5" />
               </div>
               <div className="flex flex-col gap-1">
@@ -773,7 +773,7 @@ export default function EditPostPage({
                 </span>
               </div>
             ) : isDirty ? (
-              <span className="text-[11px] text-amber-300">
+              <span className="text-[11px] text-warn">
                 Unsaved changes
               </span>
             ) : isPremium ? (
@@ -781,7 +781,7 @@ export default function EditPostPage({
                 Encrypted · readable by cap holders
               </span>
             ) : pendingDraft ? (
-              <span className="text-[11px] text-amber-300">
+              <span className="text-[11px] text-warn">
                 Draft saved · ready to publish
               </span>
             ) : (
@@ -841,7 +841,7 @@ export default function EditPostPage({
                   {!canPublish ? (
                     <TooltipContent side="top" className="max-w-xs">
                       {!pendingDraft
-                        ? "Nothing to publish - the public revision is already up to date. Edit the body and Save draft to create something to publish."
+                        ? "Nothing to publish. The public revision is already up to date. Edit the body and Save draft to create something to publish."
                         : "Wait for the current operation to finish."}
                     </TooltipContent>
                   ) : null}

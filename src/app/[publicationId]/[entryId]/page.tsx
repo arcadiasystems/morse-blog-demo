@@ -1,160 +1,238 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Lock } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/feedback/EmptyState";
-import { MarkdownRenderer } from "@/components/blog/MarkdownRenderer";
+import type { Entry } from "@arcadiasystems/morse-sdk";
+import { LockIcon } from "@/components/brand/icons";
+import { BodySkeleton } from "@/components/feedback/BodySkeleton";
+import { PostRail, type RailRevision } from "@/components/blog/PostRail";
 import { PremiumUnlock } from "@/components/blog/PremiumUnlock";
-import { classifyEntry } from "@/utils/entry-status";
+import { RevisionBody } from "@/components/blog/RevisionBody";
+import { blobRefLabel, walrusRevisionUrl } from "@/lib/explorer";
 import {
   loadPublicEntry,
-  readPublicRevisionText,
+  resolvePublicBlobId,
 } from "@/services/public-blog.server";
+import {
+  anchorEntryRevisions,
+  loadPublicationHistory,
+} from "@/services/publication-history.server";
+import { truncateAddress } from "@/utils/address";
+import { readerHead } from "@/utils/entry-status";
+import { formatChainDate } from "@/utils/format";
+import styles from "./post.module.css";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+type PostParams = Promise<{ publicationId: string; entryId: string }>;
+type PostSearchParams = Promise<{
+  collection?: string;
+  /** 1-based revision number to read instead of the current one. */
+  rev?: string | string[];
+}>;
 
 export default async function PublicPostPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ publicationId: string; entryId: string }>;
-  searchParams: Promise<{ collection?: string }>;
+  params: PostParams;
+  searchParams: PostSearchParams;
 }) {
   const { publicationId, entryId } = await params;
-  const { collection } = await searchParams;
+  const { collection, rev } = await searchParams;
   const entryIdNum = Number(entryId);
   if (!Number.isFinite(entryIdNum)) {
     notFound();
   }
-  const data = await loadPublicEntry(publicationId, entryIdNum, collection);
+
+  const [data, history] = await Promise.all([
+    loadPublicEntry(publicationId, entryIdNum, collection),
+    loadPublicationHistory(publicationId),
+  ]);
   if (!data) {
     notFound();
   }
   const { publication, entry } = data;
-  const status = classifyEntry(entry);
-
-  if (status === "draft" || status === "empty") {
+  const head = readerHead(entry);
+  if (!head) {
     notFound();
   }
 
-  if (status === "premium") {
-    return (
-      <article className="flex flex-col gap-6 py-4 sm:py-8 max-w-3xl">
-        <BackLink
-          publicationId={publicationId}
-          publicationName={publication.name}
-        />
-        <PostHeader entry={entry} premium />
-        <PremiumUnlock
-          publicationId={publicationId}
+  const viewedIndex =
+    rev === undefined ? head.index : requestedRevisionIndex(entry, head, rev);
+  if (viewedIndex === null) {
+    notFound();
+  }
+
+  const revision = entry.revisions[viewedIndex];
+  const anchors = history ? anchorEntryRevisions(history, entry) : [];
+  const anchor = anchors[viewedIndex] ?? null;
+  const blobId = await resolvePublicBlobId(revision.blobRef);
+  const blobHref = walrusRevisionUrl(revision.blobRef, blobId);
+
+  const hrefFor = (index: number) =>
+    postHref(publicationId, entry.id, collection, index === head.index ? null : index);
+  const readable = (index: number) =>
+    !head.premium && !entry.revisions[index].encrypted;
+
+  const earlierIndex = entry.revisions
+    .slice(0, viewedIndex)
+    .findLastIndex((_, index) => readable(index));
+  const earlierRevision =
+    earlierIndex >= 0
+      ? { number: earlierIndex + 1, href: hrefFor(earlierIndex) }
+      : null;
+
+  const railRevisions: RailRevision[] = entry.revisions
+    .slice(0, head.index + 1)
+    .map((_, index) => ({
+      number: index + 1,
+      anchor: anchors[index] ?? null,
+      current: index === head.index,
+      viewing: index === viewedIndex,
+      href: readable(index) ? hrefFor(index) : null,
+    }))
+    .reverse();
+
+  return (
+    <section>
+      <div className={`wrap ${styles.inner}`}>
+        <article>
+          <nav className={styles.crumbs} aria-label="Breadcrumb">
+            <Link href={`/${publicationId}`}>{publication.name}</Link>
+            <span className={styles.sep} aria-hidden="true">
+              /
+            </span>
+            <span className={styles.here} aria-current="page">
+              Entry #{entry.id}
+            </span>
+          </nav>
+          <h1>{entry.name || `Untitled (#${entry.id})`}</h1>
+          <div className={styles.meta}>
+            {head.premium ? (
+              <span className="chip prem">
+                <LockIcon size={11} strokeWidth={2.4} />
+                Premium
+              </span>
+            ) : (
+              <span className="chip pub">Public</span>
+            )}
+            <span>Entry #{entry.id}</span>
+            <span>v{viewedIndex + 1}</span>
+            {anchor ? (
+              <time dateTime={new Date(anchor.timestampMs).toISOString()}>
+                {formatChainDate(anchor.timestampMs)}
+              </time>
+            ) : null}
+            {head.premium ? null : (
+              <span>
+                by{" "}
+                <span className={styles.author} title={revision.author}>
+                  {truncateAddress(revision.author)}
+                </span>
+              </span>
+            )}
+          </div>
+          {viewedIndex !== head.index ? (
+            <p className={styles.notice}>
+              You are reading v{viewedIndex + 1}, an earlier revision.{" "}
+              <Link href={hrefFor(head.index)}>
+                Read the current version, v{head.index + 1}
+              </Link>
+            </p>
+          ) : null}
+
+          {head.premium ? (
+            <PremiumUnlock
+              className={styles.bodyTop}
+              publicationId={publicationId}
+              entryId={entry.id}
+              collectionName={collection}
+              revisionNumber={viewedIndex + 1}
+              blobHref={blobHref}
+            />
+          ) : (
+            <Suspense
+              key={viewedIndex}
+              fallback={<BodySkeleton className={styles.bodyTop} />}
+            >
+              <RevisionBody
+                className={styles.bodyTop}
+                blobRef={revision.blobRef}
+                revisionNumber={viewedIndex + 1}
+                blobHref={blobHref}
+                earlierRevision={earlierRevision}
+              />
+            </Suspense>
+          )}
+        </article>
+
+        <PostRail
+          publicationId={publication.id}
           entryId={entry.id}
-          collectionName={collection}
+          revisionNumber={viewedIndex + 1}
+          revisionCount={head.index + 1}
+          blob={{ href: blobHref, label: blobId ?? blobRefLabel(revision.blobRef) }}
+          anchor={anchor}
+          accessPolicy={revision.accessPolicy}
+          revisions={railRevisions}
         />
-      </article>
-    );
-  }
-
-  const revision = entry.revisions[entry.publicHead!];
-  if (!revision) {
-    notFound();
-  }
-  const content = await readPublicRevisionText(revision.blobRef);
-
-  return (
-    <article className="flex flex-col gap-6 py-4 sm:py-8 max-w-3xl">
-      <BackLink
-        publicationId={publicationId}
-        publicationName={publication.name}
-      />
-      <PostHeader entry={entry} />
-      {content ? (
-        <MarkdownRenderer source={content} />
-      ) : (
-        <EmptyState
-          icon={<Lock className="size-5" />}
-          title="Could not load content"
-          description="The Walrus aggregator did not return bytes for this revision. The blob may be expired, unavailable, or the aggregator may be rate-limiting. Try refreshing in a moment."
-        />
-      )}
-    </article>
-  );
-}
-
-function BackLink({
-  publicationId,
-  publicationName,
-}: {
-  publicationId: string;
-  publicationName: string;
-}) {
-  return (
-    <Button
-      asChild
-      variant="ghost"
-      size="sm"
-      className="self-start gap-1.5 -ml-2"
-    >
-      <Link href={`/${publicationId}`}>
-        <ArrowLeft className="size-4" />
-        {publicationName}
-      </Link>
-    </Button>
-  );
-}
-
-function PostHeader({
-  entry,
-  premium,
-}: {
-  entry: import("@arcadiasystems/morse-sdk").Entry;
-  premium?: boolean;
-}) {
-  const revisionCount = entry.revisions.length;
-  return (
-    <header className="flex flex-col gap-3 pb-4 border-b border-border/60">
-      <div className="flex items-center gap-2">
-        {premium ? (
-          <Badge variant="outline" className="gap-1 border-amber-400/40 bg-amber-400/10 text-amber-300">
-            <Lock className="size-3" />
-            Premium
-          </Badge>
-        ) : (
-          <Badge variant="outline" className="border-primary/40 bg-primary/10 text-primary">
-            Post
-          </Badge>
-        )}
-        <span className="text-xs text-muted-foreground font-mono">
-          #{entry.id}
-        </span>
-        <span className="text-xs text-muted-foreground">
-          · v{revisionCount}
-        </span>
       </div>
-      <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-        {entry.name || `Untitled (#${entry.id})`}
-      </h1>
-    </header>
+    </section>
   );
+}
+
+/**
+ * Index of the revision named by `?rev=`, or null when the value is
+ * malformed, newer than what readers see, or not publicly readable
+ * (premium and encrypted revisions only render through the Seal unlock).
+ */
+function requestedRevisionIndex(
+  entry: Entry,
+  head: { index: number; premium: boolean },
+  rev: string | string[],
+): number | null {
+  if (head.premium || typeof rev !== "string" || !/^[1-9]\d*$/.test(rev)) {
+    return null;
+  }
+  const index = Number(rev) - 1;
+  if (index > head.index || entry.revisions[index].encrypted) return null;
+  return index;
+}
+
+function postHref(
+  publicationId: string,
+  entryId: number,
+  collection: string | undefined,
+  revisionIndex: number | null,
+): string {
+  const query = new URLSearchParams();
+  if (collection) query.set("collection", collection);
+  if (revisionIndex !== null) query.set("rev", String(revisionIndex + 1));
+  const qs = query.toString();
+  return `/${publicationId}/${entryId}${qs ? `?${qs}` : ""}`;
 }
 
 export async function generateMetadata({
   params,
   searchParams,
 }: {
-  params: Promise<{ publicationId: string; entryId: string }>;
-  searchParams: Promise<{ collection?: string }>;
+  params: PostParams;
+  searchParams: PostSearchParams;
 }) {
   const { publicationId, entryId } = await params;
   const { collection } = await searchParams;
   const entryIdNum = Number(entryId);
   if (!Number.isFinite(entryIdNum)) {
-    return { title: "Post not found - morse blog" };
+    return { title: "Post not found" };
   }
   const data = await loadPublicEntry(publicationId, entryIdNum, collection);
-  if (!data) return { title: "Post not found - morse blog" };
+  if (!data) return { title: "Post not found" };
+  const head = readerHead(data.entry);
   return {
-    title: `${data.entry.name || `Post #${data.entry.id}`} - ${data.publication.name}`,
+    title: data.entry.name || `Post #${data.entry.id}`,
+    description: head?.premium
+      ? "A Seal-gated premium post on Sui testnet."
+      : "A public post on Sui testnet.",
   };
 }

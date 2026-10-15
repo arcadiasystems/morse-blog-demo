@@ -86,7 +86,7 @@ export function MediaPicker({
       for (const file of arr) {
         if (file.size > MAX_FILE_BYTES) {
           toast.warning(`${file.name} exceeds the ~5 MB testnet cap`, {
-            description: `${(file.size / 1024 / 1024).toFixed(1)} MB - upload may fail or be rate-limited.`,
+            description: `${(file.size / 1024 / 1024).toFixed(1)} MB. Upload may fail or be rate-limited.`,
           });
         }
         await new Promise<void>((resolve) => {

@@ -1,108 +1,140 @@
 import Link from "next/link";
-import { ArrowRight, Lock, PencilLine, Wallet } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { LockIcon, PenIcon, WalletIcon } from "@/components/brand/icons";
 import { ConnectCta } from "@/components/layout/ConnectCta";
 import { DEMO_PUBLICATION_ID } from "@/lib/morse-config";
+import styles from "./home.module.css";
+
+const FEATURES = [
+  {
+    icon: <WalletIcon size={26} strokeWidth={1.8} />,
+    title: "Wallet-native",
+    body: "Slush, Suiet, or any Sui Wallet Standard wallet. Your keys, your blog, no backend.",
+  },
+  {
+    icon: <PenIcon size={26} strokeWidth={1.8} />,
+    title: "Walrus-stored",
+    body: "Post content lives on Walrus. Append-only revisions, version history out of the box.",
+  },
+  {
+    icon: <LockIcon size={26} strokeWidth={1.8} />,
+    title: "Seal-gated premium",
+    body: "Encrypt posts client-side. Readers decrypt with one signed message. No server in the middle.",
+  },
+] as const;
+
+const STEPS = [
+  {
+    title: "Install a Sui wallet",
+    body: "Slush or Suiet as a browser extension.",
+  },
+  {
+    title: "Get testnet SUI and WAL",
+    body: "SUI from the faucet, swap a little for WAL. Both free.",
+  },
+  {
+    title: "Connect and create a publication",
+    body: "One transaction. You receive the owner and publisher caps.",
+  },
+  {
+    title: "Write a post, watch it anchor",
+    body: "The body goes to Walrus, the record to Sui. Both links appear on the post.",
+  },
+] as const;
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col gap-20 sm:gap-24 pt-4 sm:pt-8">
-      <section className="relative">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-32 -left-24 size-[420px] rounded-full bg-primary/20 blur-[120px] opacity-60"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-20 right-0 size-[320px] rounded-full bg-primary/10 blur-[120px] opacity-50"
-        />
-        <div className="relative flex flex-col items-start gap-6 max-w-3xl">
-          <Badge
-            variant="outline"
-            className="border-primary/40 bg-primary/10 text-primary"
-          >
-            <span className="size-1.5 rounded-full bg-primary mr-2 animate-pulse" />
+    <>
+      <section className={styles.hero}>
+        <div className={`wrap ${styles.heroInner}`}>
+          <span className="chip ok">
+            <i aria-hidden="true" />
             Live testnet demo
-          </Badge>
-          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight leading-[1.02]">
-            Build a blog you{" "}
-            <span className="text-primary">actually own</span>.
+          </span>
+          <h1>
+            Build a blog you <em>actually own.</em>
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed">
+          <p className={styles.lede}>
             morse·blog is a working demo of{" "}
-            <code className="font-mono text-foreground/90 text-[0.95em] px-1.5 py-0.5 rounded bg-card/70 border border-border/60">
-              @arcadiasystems/morse-sdk
-            </code>
-            . Connect a Sui wallet, create a publication, write posts to Walrus,
-            and gate premium content with Seal. Everything on-chain, no backend.
+            <code>@arcadiasystems/morse-sdk</code>. Connect a Sui wallet,
+            create a publication, write posts to Walrus, and gate premium
+            content with Seal. Everything on-chain, no backend.
           </p>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-3">
+          <div className={styles.cta}>
             <ConnectCta />
-            {DEMO_PUBLICATION_ID && (
+            {DEMO_PUBLICATION_ID ? (
               <Link
+                className="btn btn-ghost lg"
                 href={`/${DEMO_PUBLICATION_ID}`}
-                className="text-sm font-medium text-primary hover:text-primary/80 transition-colors inline-flex items-center gap-1.5 group"
               >
                 Read the demo blog
-                <ArrowRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
               </Link>
-            )}
-            <Link
-              href="/about"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5 group"
-            >
-              What is morse?
-              <ArrowRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
+            ) : null}
+            <Link className={styles.txt} href="/about">
+              What is Morse? <span aria-hidden="true">→</span>
             </Link>
           </div>
+          <SignalWire />
         </div>
       </section>
 
-      <section className="grid gap-3 sm:gap-4 sm:grid-cols-3">
-        <FeatureCard
-          icon={<Wallet className="size-5" />}
-          title="Wallet-native"
-          description="Slush, Suiet, or any Sui Wallet Standard wallet. Your keys, your blog, no backend."
-        />
-        <FeatureCard
-          icon={<PencilLine className="size-5" />}
-          title="Walrus-stored"
-          description="Post content lives on Walrus. Append-only revisions, version history out of the box."
-        />
-        <FeatureCard
-          icon={<Lock className="size-5" />}
-          title="Seal-gated premium"
-          description="Encrypt posts client-side. Readers decrypt with one signed message. No server in the middle."
-        />
+      <section className={styles.feats} aria-label="Features">
+        <div className={`wrap ${styles.featsInner}`}>
+          {FEATURES.map((feature) => (
+            <div key={feature.title} className={styles.feat}>
+              {feature.icon}
+              <h2>{feature.title}</h2>
+              <p>{feature.body}</p>
+            </div>
+          ))}
+        </div>
       </section>
-    </div>
+
+      <section>
+        <div className={`wrap ${styles.howInner}`}>
+          <h2>Four steps, about three minutes.</h2>
+          <ol className={styles.steps}>
+            {STEPS.map((step, index) => (
+              <li key={step.title}>
+                <b className={styles.stepNumber}>{index + 1}</b>
+                <strong>{step.title}</strong>
+                <span>{step.body}</span>
+              </li>
+            ))}
+          </ol>
+          <p className={styles.testnetNote}>
+            Testnet data may reset. Testnet tokens have no value. Do not
+            publish anything you cannot afford to lose.
+          </p>
+        </div>
+      </section>
+    </>
   );
 }
 
-function FeatureCard({
-  icon,
-  title,
-  description,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}) {
+/** A Morse pulse travelling along a wire, with three anchored records. */
+function SignalWire() {
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-border/60 bg-card/40 p-5 hover:border-primary/40 hover:bg-card/70 transition-all">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-12 -right-12 size-32 rounded-full bg-primary/0 blur-2xl group-hover:bg-primary/15 transition-colors"
-      />
-      <div className="relative flex flex-col gap-3">
-        <div className="grid place-items-center size-9 rounded-lg bg-primary/10 text-primary border border-primary/30">
-          {icon}
-        </div>
-        <h3 className="text-base font-semibold tracking-tight">{title}</h3>
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          {description}
-        </p>
-      </div>
-    </div>
+    <svg
+      className={styles.wire}
+      aria-hidden="true"
+      viewBox="0 0 1064 56"
+      preserveAspectRatio="none"
+    >
+      <path className={styles.wireLine} d="M0 28H1064" strokeWidth={1.5} />
+      <g
+        className={styles.pulse}
+        fill="none"
+        strokeWidth={3}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M0 28H30V6H60V28H90V6H120V28H150" />
+      </g>
+      <g className={styles.nodes}>
+        <circle cx="300" cy="28" r="5" />
+        <circle cx="640" cy="28" r="5" />
+        <circle cx="930" cy="28" r="5" />
+      </g>
+    </svg>
   );
 }

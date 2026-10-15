@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useCurrentAccount } from "@mysten/dapp-kit";
+import type { AddEntryResult } from "@arcadiasystems/morse-sdk";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,7 @@ import {
 } from "@/components/ui/tooltip";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
+import { showPublishToast } from "@/components/feedback/PublishToast";
 import { StatusIndicator } from "@/components/feedback/StatusIndicator";
 import { Field } from "@/components/forms/Field";
 import { FormShell } from "@/components/forms/FormShell";
@@ -202,11 +204,13 @@ export default function WritePostPage({
     } as const;
 
     const handlers = {
-      onSuccess: (result: { entryId: number }) => {
-        toast.success(premium ? "Premium post published" : "Post published", {
-          description: premium
-            ? `Encrypted entry #${result.entryId} is live - readers need to unlock.`
-            : `Entry #${result.entryId} is live.`,
+      onSuccess: (result: AddEntryResult) => {
+        showPublishToast({
+          publicationId,
+          collectionName,
+          entryId: result.entryId,
+          revisionId: result.revisionId,
+          digest: result.digest,
         });
         router.push(`/my-blogs/${publicationId}`);
       },
@@ -255,7 +259,7 @@ export default function WritePostPage({
             {WALRUS_STORAGE_EPOCHS} epochs
           </span>{" "}
           (~{WALRUS_STORAGE_EPOCHS} days on testnet). After that the storage
-          lease expires and the content is removed - blobs are not permanent.
+          lease expires and the content is removed. Blobs are not permanent.
           This demo uses a fixed duration to keep things simple; a real app
           would let you choose how long to store each post (longer costs more
           WAL). Also keep posts under ~5 MB for reliable testnet uploads.
@@ -393,7 +397,7 @@ export default function WritePostPage({
                     <TooltipContent side="left" className="max-w-xs">
                       Encrypts the body client-side with Seal. Only wallets
                       that hold a publisher cap on this publication can unlock
-                      and read it. Premium posts have no public revision - the
+                      and read it. Premium posts have no public revision: the
                       encrypted draft IS the visible version (no separate
                       publish step).
                     </TooltipContent>
