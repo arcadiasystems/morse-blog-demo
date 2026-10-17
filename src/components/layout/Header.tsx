@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCurrentAccount } from "@mysten/dapp-kit";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import { MorseMark } from "@/components/brand/MorseMark";
 import { WalletButton } from "@/components/layout/WalletButton";
 import styles from "./Header.module.css";

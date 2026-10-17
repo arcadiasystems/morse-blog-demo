@@ -9,7 +9,7 @@ import {
   Settings,
   Users,
 } from "lucide-react";
-import { useCurrentAccount } from "@mysten/dapp-kit";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import { toast } from "sonner";
 import { Boxes, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";

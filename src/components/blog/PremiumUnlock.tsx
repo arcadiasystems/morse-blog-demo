@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { useCurrentAccount } from "@mysten/dapp-kit";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import { LockIcon } from "@/components/brand/icons";
 import { StateCard } from "@/components/feedback/StateCard";
 import { RevisionLoadError } from "@/components/feedback/RevisionLoadError";

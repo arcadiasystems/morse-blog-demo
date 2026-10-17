@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCurrentAccount } from "@mysten/dapp-kit";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import { WalletButton } from "@/components/layout/WalletButton";
 
 export function ConnectCta() {

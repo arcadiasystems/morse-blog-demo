@@ -4,12 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import {
-  useConnectWallet,
   useCurrentAccount,
   useCurrentWallet,
-  useDisconnectWallet,
+  useDAppKit,
   useWallets,
-} from "@mysten/dapp-kit";
+  type UiWallet,
+} from "@mysten/dapp-kit-react";
+import { useMutation } from "@tanstack/react-query";
 import { Check, Copy, ExternalLink, Loader2, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -49,10 +50,16 @@ const SIZE_CLASS: Record<NonNullable<Props["size"]>, string> = {
 
 export function WalletButton({ size = "default", className }: Props) {
   const account = useCurrentAccount();
-  const { currentWallet } = useCurrentWallet();
+  const currentWallet = useCurrentWallet();
   const wallets = useWallets();
-  const connect = useConnectWallet();
-  const disconnect = useDisconnectWallet();
+  const dAppKit = useDAppKit();
+  const connect = useMutation({
+    mutationFn: ({ wallet }: { wallet: UiWallet }) =>
+      dAppKit.connectWallet({ wallet }),
+  });
+  const disconnect = useMutation({
+    mutationFn: () => dAppKit.disconnectWallet(),
+  });
   const router = useRouter();
   const pathname = usePathname();
   // Publication routes (`/[publicationId]`, `/my-blogs/[publicationId]`)
@@ -184,7 +191,7 @@ export function WalletButton({ size = "default", className }: Props) {
             wallets.map((wallet) => {
               const isConnecting =
                 connect.isPending &&
-                connect.variables?.wallet?.name === wallet.name;
+                connect.variables?.wallet.name === wallet.name;
               return (
                 <button
                   type="button"
