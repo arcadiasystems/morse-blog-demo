@@ -63,7 +63,7 @@ export const FAUCET_URLS = {
  */
 export const DEMO_PUBLICATION_ID =
 	process.env.NEXT_PUBLIC_DEMO_PUBLICATION_ID ??
-	"0x69d4c49be455c72c91de0fdabbb9d94f396ace0cc7f5bbd4b858086dde9cf327";
+	"0xb56650d2a9bae1ea328cd6c5febeca284df7d7cbf4775b04635b3acaf4bab724";
 
 export const DEFAULT_COLLECTION_NAME = "posts";
 export const MEDIA_COLLECTION_NAME = "media";
