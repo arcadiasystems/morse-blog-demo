@@ -21,7 +21,7 @@ export function Header() {
         </Link>
         <span
           className={`chip ${styles.net}`}
-          title="morse-sdk is testnet-only. Mainnet is disabled in this demo."
+          title="Morse runs on Walrus Mainnet. Mainnet is disabled in this demo."
         >
           <i aria-hidden="true" />
           <b>Testnet</b>

@@ -15,11 +15,11 @@ import {
 import { Toaster } from "@/components/ui/sonner";
 import { morseAppConfig } from "@/lib/morse-config";
 
-// `mainnet` is listed so dapp-kit's network selector keeps the entry visible
-// for forward compatibility, but morse-sdk@0.1.x is testnet-only. The
-// MainnetBanner and the Testnet pill in Header make it explicit to users
-// that mainnet wallets won't work end-to-end. Remove this comment + ship
-// mainnet support once the morse contracts are deployed on mainnet.
+// Morse runs on Walrus Mainnet (morse-sdk 0.5.0 added it), but this demo
+// stays on testnet: every read, write and signature targets the default
+// `testnet` network. `mainnet` and `devnet` are listed because dapp-kit
+// drops wallet accounts on unlisted chains, so a wallet account on
+// `sui:mainnet` still connects and MainnetBanner can ask the user to switch.
 const GRPC_URLS = {
   testnet: morseAppConfig.rpcUrl,
   mainnet: "https://fullnode.mainnet.sui.io:443",
