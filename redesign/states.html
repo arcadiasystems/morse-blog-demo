@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>States · morse·blog</title>
+<meta name="description" content="">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="blog.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html" aria-label="morse blog home"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 100 100"><path d="M8 72 V30 H36 V72 H64 V30 H92 V72" fill="none" stroke="#121418" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/></svg><span>morse</span><em>BLOG</em></a>
+  <span class="chip net"><i aria-hidden="true" style="background:#2B3BE0"></i><b>Testnet</b><s>mainnet off</s></span>
+  <div class="right"><a class="lnk" href="about.html">About</a><span class="wallet"><i aria-hidden="true"></i><b>0x7be4…11d0</b><span class="caps">publisher cap</span><button type="button">Disconnect</button></span></div>
+</div></header>
+
+
+<section class="gallery"><div class="wrap">
+  <h1>States</h1>
+  <div><h2>Top bar, wallet connected</h2><div class="row" style="margin-top:14px"><span class="wallet"><i aria-hidden="true"></i><b>0x7be4…11d0</b><span class="caps">publisher cap</span><button type="button">Disconnect</button></span><span class="chip net"><i aria-hidden="true" style="background:#2B3BE0"></i><b>Testnet</b><s>mainnet off</s></span></div></div>
+  <div><h2>Post could not load</h2>
+    <div class="state warn" style="margin-top:14px"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8A5A00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg><div><b>Could not load this revision</b><p>The Walrus aggregator did not return bytes for revision v2. The blob may have expired after a testnet reset, or the aggregator may be rate-limiting. The on-chain record is unaffected.</p><div class="acts"><a class="btn btn-ink" href="#">Try again</a><a class="btn btn-soft" href="#">Open blob on Walrus</a><a class="btn btn-soft" href="#">Read v1 instead</a></div></div></div>
+  </div>
+  <div><h2>Loading</h2><div class="skel"><i></i><i></i><i></i><i></i><i></i></div></div>
+  <div><h2>Publish toast, shown after a post lands</h2><div class="row" style="margin-top:14px"><span class="toast"><i aria-hidden="true"></i>Entry #5 anchored on Sui <a href="#">tx 7Kq2…9vB</a><a href="#">blob eW2k…p4Q</a></span></div></div>
+  <div><h2>Empty publication</h2><div class="state" style="margin-top:14px"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2B3BE0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16M6 16l10-10 2 2-10 10H6v-2z"/></svg><div><b>No posts yet</b><p>Your publication exists on Sui. Write the first post and its body goes to Walrus, its record to the chain.</p><div class="acts"><a class="btn btn-ultra" href="#">Write the first post</a></div></div></div></div>
+  <div><h2>Unlocking a premium post</h2><div class="state" style="margin-top:14px"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2B3BE0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><div><b>Sign to decrypt</b><p>Your wallet will ask you to sign one message. Nothing is sent on-chain and no gas is spent. The Seal key server checks your capability and returns the key.</p><div class="acts"><a class="btn btn-ultra" href="#">Sign message</a><a class="btn btn-soft" href="#">Cancel</a></div></div></div></div>
+</div></section>
+
+<footer class="foot"><div class="wrap"><span>A demo of <a href="https://www.npmjs.com/package/@arcadiasystems/morse-sdk">@arcadiasystems/morse-sdk</a>, decentralized publishing on Sui.</span><span style="display:flex;gap:22px;align-items:center"><a href="https://github.com/arcadiasystems/morse-dcms">GitHub</a><a href="about.html">About</a><a href="https://www.morsecms.xyz">morsecms.xyz</a><span class="sig" aria-hidden="true">-- --- .-. ... .</span></span></div></footer>
+
+</body>
+</html>

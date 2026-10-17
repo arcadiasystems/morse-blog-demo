@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The launch playbook · morse·blog</title>
+<meta name="description" content="A Seal-gated premium post on Sui testnet.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="blog.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html" aria-label="morse blog home"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 100 100"><path d="M8 72 V30 H36 V72 H64 V30 H92 V72" fill="none" stroke="#121418" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/></svg><span>morse</span><em>BLOG</em></a>
+  <span class="chip net"><i aria-hidden="true" style="background:#2B3BE0"></i><b>Testnet</b><s>mainnet off</s></span>
+  <div class="right"><a class="lnk" href="about.html">About</a><a class="btn btn-ultra" href="#" style="min-height:40px;font-size:14px;padding:0 16px"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M16 12h2M3 10h18"/></svg>Connect wallet</a></div>
+</div></header>
+
+
+<section class="article"><div class="wrap">
+  <article>
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="blog.html">The Morse Demo Blog</a><span>/</span><span style="color:var(--ink)">Entry #4</span></nav>
+    <h1>The launch playbook</h1>
+    <div class="meta"><span class="chip prem"><svg aria-hidden="true" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Premium</span><span>Entry #4</span><span>v1</span><span>12 Oct 2026</span></div>
+    <div class="lock">
+      <div class="blur" aria-hidden="true">
+        <p>Lorem ipsum is not used here; this text is only a shape. The body of a premium post is encrypted client-side before it reaches Walrus, so the bytes on the network are unreadable without a key.</p>
+        <p>Readers who hold the right capability sign one message and the Seal key server releases the decryption key. The decrypted text never touches a Morse server because there is no Morse server.</p>
+        <p>What follows is the playbook itself, section by section, with the numbers from the first three launches.</p>
+        <p>The first rule is to publish the terms before the raise, not after. The second is to anchor the roadmap the day it is announced. The third is to never edit in place.</p>
+      </div>
+      <div class="panel">
+        <div class="unlock">
+          <b><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2B3BE0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Connect to unlock</b>
+          <p>This post is encrypted with Seal. Connect a wallet that holds a publisher cap on this blog, sign one message, and it decrypts in your browser.</p>
+          <a class="btn btn-ultra" href="#"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M16 12h2M3 10h18"/></svg>Connect wallet</a>
+          <small>No wallet? The public posts on this blog need nothing. The encrypted bytes are still on Walrus and the record is still on Sui; only the key is gated.</small>
+        </div>
+      </div>
+    </div>
+  </article>
+  
+<aside class="rail">
+  <div class="record">
+    <div class="hd"><span>ON-CHAIN RECORD</span><span class="chip ok"><i aria-hidden="true"></i>Anchored</span></div>
+    <dl>
+      <dt>Publication</dt><dd><a href="https://suiscan.xyz/testnet/object/0x69d4c49be455c72c91de0fdabbb9d94f396ace0cc7f5bbd4b858086dde9cf327">0x69d4c49b…9cf327</a></dd>
+      <dt>Entry</dt><dd>#4 · revision 1 of 1</dd>
+      <dt>Walrus blob</dt><dd><a href="https://aggregator.walrus-testnet.walrus.space/v1/blobs/0iKeii">0iKeiiQ2…m7Xp</a></dd>
+      <dt>Sui transaction</dt><dd><a href="https://suiscan.xyz/testnet/tx/D9Yfjk">D9YfjkA3…9vB</a></dd>
+      <dt>Anchored</dt><dd class="t">12 Oct 2026, 09:40 UTC · epoch 412</dd>
+      <dt>Access policy</dt><dd class="t">Subscribers · Seal</dd>
+    </dl>
+    <div class="ft">Content served from Walrus and checked against the Sui record on every load. Nobody can edit this revision, including the author.</div>
+  </div>
+  <div class="revs">
+    <div class="hd">REVISIONS</div>
+    <div class="rev"><span class="v">v1</span><span class="d">12 Oct 2026 · first published</span><span class="cur">CURRENT</span></div>
+  </div>
+  <p class="railnote">Revisions append. Earlier versions stay readable forever.</p>
+</aside>
+</div></section>
+
+<footer class="foot"><div class="wrap"><span>A demo of <a href="https://www.npmjs.com/package/@arcadiasystems/morse-sdk">@arcadiasystems/morse-sdk</a>, decentralized publishing on Sui.</span><span style="display:flex;gap:22px;align-items:center"><a href="https://github.com/arcadiasystems/morse-dcms">GitHub</a><a href="about.html">About</a><a href="https://www.morsecms.xyz">morsecms.xyz</a><span class="sig" aria-hidden="true">-- --- .-. ... .</span></span></div></footer>
+
+</body>
+</html>

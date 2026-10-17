@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>morse·blog, a blog you actually own</title>
+<meta name="description" content="A working demo of @arcadiasystems/morse-sdk on Sui testnet.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="blog.css">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="index.html" aria-label="morse blog home"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 100 100"><path d="M8 72 V30 H36 V72 H64 V30 H92 V72" fill="none" stroke="#121418" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/></svg><span>morse</span><em>BLOG</em></a>
+  <span class="chip net"><i aria-hidden="true" style="background:#2B3BE0"></i><b>Testnet</b><s>mainnet off</s></span>
+  <div class="right"><a class="lnk" href="about.html">About</a><a class="btn btn-ultra" href="#" style="min-height:40px;font-size:14px;padding:0 16px"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M16 12h2M3 10h18"/></svg>Connect wallet</a></div>
+</div></header>
+
+
+<section class="hero">
+  <div class="wrap">
+    <span class="chip ok"><i aria-hidden="true"></i>Live testnet demo</span>
+    <h1>Build a blog you <em>actually own.</em></h1>
+    <p>morse·blog is a working demo of <code>@arcadiasystems/morse-sdk</code>. Connect a Sui wallet, create a publication, write posts to Walrus, and gate premium content with Seal. Everything on-chain, no backend.</p>
+    <div class="cta">
+      <a class="btn btn-ultra lg" href="#"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M16 12h2M3 10h18"/></svg>Connect wallet</a>
+      <a class="btn btn-ghost lg" href="blog.html">Read the demo blog</a>
+      <a class="txt" href="about.html">What is Morse? <span aria-hidden="true">→</span></a>
+    </div>
+    <svg class="wire" aria-hidden="true" viewBox="0 0 1064 56" preserveAspectRatio="none">
+      <path d="M0 28H1064" stroke="#DAD6CC" stroke-width="1.5"/>
+      <g fill="none" stroke="#2B3BE0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M0 28H30V6H60V28H90V6H120V28H150"><animateTransform attributeName="transform" type="translate" from="-160 0" to="1100 0" dur="7s" repeatCount="indefinite"/></path></g>
+      <g fill="#2B3BE0"><circle cx="300" cy="28" r="5"/><circle cx="640" cy="28" r="5"/><circle cx="930" cy="28" r="5"/></g>
+    </svg>
+  </div>
+</section>
+<section class="feats"><div class="wrap">
+  <div class="feat"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M16 12h2M3 10h18"/></svg><b>Wallet-native</b><span>Slush, Suiet, or any Sui Wallet Standard wallet. Your keys, your blog, no backend.</span></div>
+  <div class="feat"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16M6 16l10-10 2 2-10 10H6v-2z"/></svg><b>Walrus-stored</b><span>Post content lives on Walrus. Append-only revisions, version history out of the box.</span></div>
+  <div class="feat"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><b>Seal-gated premium</b><span>Encrypt posts client-side. Readers decrypt with one signed message. No server in the middle.</span></div>
+</div></section>
+<section class="howdemo"><div class="wrap">
+  <h2>Four steps, about three minutes.</h2>
+  <ol>
+    <li><b class="n">1</b><strong>Install a Sui wallet</strong><span>Slush or Suiet as a browser extension.</span></li>
+    <li><b class="n">2</b><strong>Get testnet SUI and WAL</strong><span>SUI from the faucet, swap a little for WAL. Both free.</span></li>
+    <li><b class="n">3</b><strong>Connect and create a publication</strong><span>One transaction. You receive the owner and publisher caps.</span></li>
+    <li><b class="n">4</b><strong>Write a post, watch it anchor</strong><span>The body goes to Walrus, the record to Sui. Both links appear on the post.</span></li>
+  </ol>
+  <p style="font-size:13.5px;color:var(--stone)">Testnet data may reset. Testnet tokens have no value. Do not publish anything you cannot afford to lose.</p>
+</div></section>
+
+<footer class="foot"><div class="wrap"><span>A demo of <a href="https://www.npmjs.com/package/@arcadiasystems/morse-sdk">@arcadiasystems/morse-sdk</a>, decentralized publishing on Sui.</span><span style="display:flex;gap:22px;align-items:center"><a href="https://github.com/arcadiasystems/morse-dcms">GitHub</a><a href="about.html">About</a><a href="https://www.morsecms.xyz">morsecms.xyz</a><span class="sig" aria-hidden="true">-- --- .-. ... .</span></span></div></footer>
+
+</body>
+</html>
