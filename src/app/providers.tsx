@@ -2,30 +2,47 @@
 
 import { ReactNode, useEffect, useRef, useState } from "react";
 import {
-  SuiClientProvider,
-  WalletProvider,
-  createNetworkConfig,
+  DAppKitProvider,
+  createDAppKit,
   useCurrentAccount,
-} from "@mysten/dapp-kit";
-import { getJsonRpcFullnodeUrl } from "@mysten/sui/jsonRpc";
+} from "@mysten/dapp-kit-react";
+import { SuiGrpcClient } from "@mysten/sui/grpc";
 import {
   QueryClient,
   QueryClientProvider,
   useQueryClient,
 } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
-import "@mysten/dapp-kit/dist/index.css";
+import { morseAppConfig } from "@/lib/morse-config";
 
-// `mainnet` is listed so dapp-kit's network selector keeps the entry visible
-// for forward compatibility, but morse-sdk@0.1.x is testnet-only. The
-// MainnetBanner and the Testnet pill in Header make it explicit to users
-// that mainnet wallets won't work end-to-end. Remove this comment + ship
-// mainnet support once the morse contracts are deployed on mainnet.
-const { networkConfig } = createNetworkConfig({
-  testnet: { url: getJsonRpcFullnodeUrl("testnet"), network: "testnet" },
-  mainnet: { url: getJsonRpcFullnodeUrl("mainnet"), network: "mainnet" },
-  devnet: { url: getJsonRpcFullnodeUrl("devnet"), network: "devnet" },
+// Morse runs on Walrus Mainnet (morse-sdk 0.5.0 added it), but this demo
+// stays on testnet: every read, write and signature targets the default
+// `testnet` network. `mainnet` and `devnet` are listed because dapp-kit
+// drops wallet accounts on unlisted chains, so a wallet account on
+// `sui:mainnet` still connects and MainnetBanner can ask the user to switch.
+const GRPC_URLS = {
+  testnet: morseAppConfig.rpcUrl,
+  mainnet: "https://fullnode.mainnet.sui.io:443",
+  devnet: "https://fullnode.devnet.sui.io:443",
+} as const;
+
+const dAppKit = createDAppKit({
+  networks: ["testnet", "mainnet", "devnet"],
+  defaultNetwork: "testnet",
+  createClient: (network) =>
+    new SuiGrpcClient({ network, baseUrl: GRPC_URLS[network] }),
+  autoConnect: true,
+  // List only the wallets installed in this browser, so the connect dialog
+  // keeps its "No Sui wallets detected" install prompt. dapp-kit otherwise
+  // adds Slush's web wallet.
+  slushWalletConfig: null,
 });
+
+declare module "@mysten/dapp-kit-react" {
+  interface Register {
+    dAppKit: typeof dAppKit;
+  }
+}
 
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -42,13 +59,11 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SuiClientProvider networks={networkConfig} defaultNetwork="testnet">
-        <WalletProvider autoConnect>
-          <WalletCacheReset />
-          {children}
-          <Toaster position="bottom-right" />
-        </WalletProvider>
-      </SuiClientProvider>
+      <DAppKitProvider dAppKit={dAppKit}>
+        <WalletCacheReset />
+        {children}
+        <Toaster position="bottom-right" />
+      </DAppKitProvider>
     </QueryClientProvider>
   );
 }

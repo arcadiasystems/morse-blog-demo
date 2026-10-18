@@ -1,12 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import {
-  useCurrentAccount,
-  useSignAndExecuteTransaction,
-  useSignPersonalMessage,
-  useSignTransaction,
-} from "@mysten/dapp-kit";
+import { useCurrentAccount, useDAppKit } from "@mysten/dapp-kit-react";
 import { SuiGrpcClient } from "@mysten/sui/grpc";
 import {
   BrowserStoragePubkeyCache,
@@ -50,9 +45,7 @@ function pickPubkeyCache(): PubkeyCache | undefined {
 
 export function useMorse(): MorseClient | null {
   const account = useCurrentAccount();
-  const { mutateAsync: signAndExecute } = useSignAndExecuteTransaction();
-  const { mutateAsync: signTransaction } = useSignTransaction();
-  const { mutateAsync: signPersonalMessage } = useSignPersonalMessage();
+  const dAppKit = useDAppKit();
 
   const [client, setClient] = useState<MorseClient | null>(null);
 
@@ -66,7 +59,16 @@ export function useMorse(): MorseClient | null {
     });
     const adapter = new WalletStandardAdapter(
       account.address,
-      ({ transaction }) => signAndExecute({ transaction }),
+      async ({ transaction }) => {
+        const result = await dAppKit.signAndExecuteTransaction({ transaction });
+        // A failed execution still lands on chain under a digest; the
+        // adapter reads its effects back and throws the on-chain error.
+        const executed =
+          result.$kind === "Transaction"
+            ? result.Transaction
+            : result.FailedTransaction;
+        return { digest: executed.digest };
+      },
       suiClient,
     );
     const reader = RpcPublicationReader.fromMorseConfig(config, suiClient);
@@ -89,7 +91,7 @@ export function useMorse(): MorseClient | null {
       config,
       suiClient,
     };
-  }, [account, signAndExecute]);
+  }, [account, dAppKit]);
 
   useEffect(() => {
     if (!baseline) {
@@ -102,9 +104,9 @@ export function useMorse(): MorseClient | null {
           baseline.account!,
           {
             signTransaction: ({ transaction }) =>
-              signTransaction({ transaction }),
+              dAppKit.signTransaction({ transaction }),
             signPersonalMessage: ({ message }) =>
-              signPersonalMessage({ message }),
+              dAppKit.signPersonalMessage({ message }),
           },
           { pubkeyCache: pickPubkeyCache() },
         );
@@ -132,7 +134,7 @@ export function useMorse(): MorseClient | null {
     return () => {
       cancelled = true;
     };
-  }, [baseline, signTransaction, signPersonalMessage]);
+  }, [baseline, dAppKit]);
 
   // `client` is set once the signer resolves, so right after an account
   // switch it still holds the previous wallet's client. Hand it out only

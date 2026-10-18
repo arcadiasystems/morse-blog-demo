@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCurrentAccount } from "@mysten/dapp-kit";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import { MorseMark } from "@/components/brand/MorseMark";
 import { WalletButton } from "@/components/layout/WalletButton";
 import styles from "./Header.module.css";
@@ -21,7 +21,7 @@ export function Header() {
         </Link>
         <span
           className={`chip ${styles.net}`}
-          title="morse-sdk is testnet-only. Mainnet is disabled in this demo."
+          title="Morse runs on Walrus Mainnet. Mainnet is disabled in this demo."
         >
           <i aria-hidden="true" />
           <b>Testnet</b>

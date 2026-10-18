@@ -1,50 +1,64 @@
 "use client";
 
-import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
+import type { SuiGrpcClient } from "@mysten/sui/grpc";
+import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { ExternalLink } from "lucide-react";
 import {
   DropdownMenuItem,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
+import { useMorseReader } from "@/hooks/use-morse-reader";
 import { FAUCET_URLS, WAL_TESTNET_COIN_TYPE } from "@/lib/morse-config";
 import { formatCoinBalance } from "@/utils/format";
 
 const SUI_COIN_TYPE = "0x2::sui::SUI";
 
+/** Total balance of `coinType` held by `owner`, in the coin's base units. */
+function coinBalanceQuery(
+  client: SuiGrpcClient,
+  owner: string | null,
+  coinType: string,
+) {
+  return queryOptions({
+    queryKey: ["coin-balance", owner, coinType],
+    queryFn: owner
+      ? async ({ signal }) => {
+          const { balance } = await client.getBalance({
+            owner,
+            coinType,
+            signal,
+          });
+          return balance.balance;
+        }
+      : skipToken,
+    refetchInterval: 30_000,
+    staleTime: 20_000,
+  });
+}
+
 /** Testnet SUI and WAL balances plus faucet links, for the wallet menu. */
 export function WalletBalances() {
-  const account = useCurrentAccount();
+  const { address, client } = useMorseReader();
 
-  const suiBalance = useSuiClientQuery(
-    "getBalance",
-    { owner: account?.address ?? "", coinType: SUI_COIN_TYPE },
-    {
-      enabled: Boolean(account),
-      refetchInterval: 30_000,
-      staleTime: 20_000,
-    },
+  const suiBalance = useQuery(coinBalanceQuery(client, address, SUI_COIN_TYPE));
+  const walBalance = useQuery(
+    coinBalanceQuery(client, address, WAL_TESTNET_COIN_TYPE),
   );
 
-  const walBalance = useSuiClientQuery(
-    "getBalance",
-    { owner: account?.address ?? "", coinType: WAL_TESTNET_COIN_TYPE },
-    {
-      enabled: Boolean(account),
-      refetchInterval: 30_000,
-      staleTime: 20_000,
+  const walMeta = useQuery({
+    queryKey: ["coin-metadata", WAL_TESTNET_COIN_TYPE],
+    queryFn: async ({ signal }) => {
+      const { coinMetadata } = await client.getCoinMetadata({
+        coinType: WAL_TESTNET_COIN_TYPE,
+        signal,
+      });
+      return coinMetadata;
     },
-  );
+    enabled: address !== null,
+    staleTime: Infinity,
+  });
 
-  const walMeta = useSuiClientQuery(
-    "getCoinMetadata",
-    { coinType: WAL_TESTNET_COIN_TYPE },
-    {
-      enabled: Boolean(account),
-      staleTime: Infinity,
-    },
-  );
-
-  if (!account) return null;
+  if (!address) return null;
 
   const walDecimals = walMeta.data?.decimals ?? 9;
   const walReady = !walBalance.isPending && !walMeta.isPending;
@@ -60,14 +74,14 @@ export function WalletBalances() {
           value={
             suiBalance.isPending
               ? null
-              : formatCoinBalance(suiBalance.data?.totalBalance, 9)
+              : formatCoinBalance(suiBalance.data, 9)
           }
         />
         <BalanceRow
           symbol="WAL"
           value={
             walReady
-              ? formatCoinBalance(walBalance.data?.totalBalance, walDecimals)
+              ? formatCoinBalance(walBalance.data, walDecimals)
               : null
           }
         />

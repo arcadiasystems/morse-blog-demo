@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { useCurrentAccount } from "@mysten/dapp-kit";
+import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import { SuiGrpcClient } from "@mysten/sui/grpc";
 import {
   HttpAggregatorReadAdapter,

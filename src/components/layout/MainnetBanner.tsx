@@ -1,11 +1,11 @@
 "use client";
 
-import { useCurrentAccount, useCurrentWallet } from "@mysten/dapp-kit";
+import { useCurrentAccount, useCurrentWallet } from "@mysten/dapp-kit-react";
 import { WarnIcon } from "@/components/brand/icons";
 
 export function MainnetBanner() {
   const account = useCurrentAccount();
-  const { currentWallet } = useCurrentWallet();
+  const currentWallet = useCurrentWallet();
 
   if (!account || !currentWallet) return null;
 

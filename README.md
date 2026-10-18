@@ -52,14 +52,14 @@ Premium entries are created with `addEncryptedEntry` and live as encrypted draft
 - **Server components** render the public reader (`/[publicationId]` index + post pages) so first paint is fast and link previews include real titles
 - **Client components** drive every authoring flow (wallet, write, edit) via `useMorse()` which assembles `{ adapter, signer, reader, walrusRead, walrusWrite, seal, config, client }`
 - **HTTP Walrus adapters** (`HttpAggregatorReadAdapter` + `HttpPublisherWriteAdapter`) so the demo doesn't need WAL in your wallet — the publisher absorbs storage cost, every public-post write is 1 popup
-- **Pinned Mysten substrate** matching morse-sdk's peer deps: `@mysten/sui@2.16.2`, `@mysten/walrus@1.1.6`, `@mysten/seal@1.1.3`
+- **Pinned Mysten substrate** matching morse-sdk 0.9's peer deps: `@mysten/sui@2.36.0`, `@mysten/walrus@1.2.35`, `@mysten/seal@1.5.0`
 
 ```
 src/
 ├── app/                    # routes (App Router)
 │   ├── [publicationId]/    # public reader (server-rendered)
 │   ├── my-blogs/           # author flows (client)
-│   └── providers.tsx       # WalletProvider + QueryClient + Sonner
+│   └── providers.tsx       # DAppKitProvider + QueryClient + Sonner
 ├── components/
 │   ├── blog/               # PublicationCard, EntryRow, MarkdownEditor, MediaPicker, ContentPicker, PremiumNotice, ...
 │   ├── feedback/           # EmptyState, ErrorState, StatusIndicator, skeletons
@@ -99,7 +99,7 @@ This is a static-export-friendly Next App Router project — Vercel auto-detects
 - Next.js 16 (App Router, Turbopack)
 - React 19, TypeScript 5
 - Tailwind v4 + shadcn/ui (dark-only)
-- `@mysten/dapp-kit` 1.x for wallet integration
+- `@mysten/dapp-kit-react` 2.x for wallet integration, on a gRPC `SuiGrpcClient`
 - `@uiw/react-md-editor` for the post writer (lazy-loaded)
 - `react-markdown` + `remark-gfm` for the public reader
 - TanStack Query for SDK reads and mutation orchestration
