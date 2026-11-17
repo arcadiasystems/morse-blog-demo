@@ -4,9 +4,9 @@ import { FormEvent, useState } from "react";
 import {
   Copy,
   Info,
-  Loader2,
+  LoaderCircle,
   MailPlus,
-  Trash2,
+  Trash,
   UserPlus,
   Users,
 } from "lucide-react";
@@ -232,7 +232,7 @@ export function MembersTab({ publicationId }: { publicationId: string }) {
           </div>
           <Button type="submit" disabled={!canIssue} className="gap-1.5">
             {issue.isPending ? (
-              <Loader2 className="size-4 animate-spin" />
+              <LoaderCircle className="size-4 animate-spin" />
             ) : (
               <MailPlus className="size-4" />
             )}
@@ -293,9 +293,9 @@ export function MembersTab({ publicationId }: { publicationId: string }) {
                       aria-label="Revoke cap"
                     >
                       {revokingId === cap.publisherCapId ? (
-                        <Loader2 className="size-4 animate-spin" />
+                        <LoaderCircle className="size-4 animate-spin" />
                       ) : (
-                        <Trash2 className="size-4" />
+                        <Trash className="size-4" />
                       )}
                     </Button>
                   </AlertDialogTrigger>

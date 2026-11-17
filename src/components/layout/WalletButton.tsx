@@ -11,7 +11,7 @@ import {
   type UiWallet,
 } from "@mysten/dapp-kit-react";
 import { useMutation } from "@tanstack/react-query";
-import { Check, Copy, ExternalLink, Loader2, LogOut } from "lucide-react";
+import { Check, Copy, ExternalLink, LoaderCircle, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -235,7 +235,7 @@ export function WalletButton({ size = "default", className }: Props) {
                   )}
                   <span className="flex-1 min-w-0 truncate">{wallet.name}</span>
                   {isConnecting ? (
-                    <Loader2
+                    <LoaderCircle
                       className="size-4 animate-spin text-muted-foreground"
                       aria-label="Connecting"
                     />

@@ -1,7 +1,7 @@
 "use client";
 
 import { DragEvent, useCallback, useState } from "react";
-import { Image as ImageIcon, Loader2, Upload } from "lucide-react";
+import { Image as ImageIcon, LoaderCircle, Upload } from "lucide-react";
 import { toast } from "sonner";
 import type { Entry } from "@arcadiasystems/morse-sdk";
 import { Button } from "@/components/ui/button";
@@ -208,7 +208,7 @@ export function MediaPicker({
           />
           <div className="grid place-items-center size-10 rounded-full bg-primary/10 text-primary border border-primary/30">
             {upload.isPending ? (
-              <Loader2 className="size-4 animate-spin" />
+              <LoaderCircle className="size-4 animate-spin" />
             ) : (
               <Upload className="size-4" />
             )}

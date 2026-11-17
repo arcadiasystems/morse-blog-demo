@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { TriangleAlert } from "lucide-react";
+import { TriangleExclamationPoint } from "lucide-react";
 
 export function ErrorState({
   title = "Something went wrong",
@@ -13,7 +13,7 @@ export function ErrorState({
   return (
     <div className="flex flex-col items-center text-center gap-3 rounded-xl border border-destructive/40 bg-destructive/5 px-6 py-10">
       <div className="grid place-items-center size-11 rounded-full bg-destructive/15 text-destructive border border-destructive/40">
-        <TriangleAlert className="size-5" />
+        <TriangleExclamationPoint className="size-5" />
       </div>
       <h3 className="text-base font-semibold tracking-tight">{title}</h3>
       {description ? (

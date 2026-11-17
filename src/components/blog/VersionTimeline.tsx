@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Circle, Eye, Lock, PencilLine } from "lucide-react";
+import { CircleCheck, Circle, Eye, Lock, PencilLine } from "lucide-react";
 import type { Entry, Revision } from "@arcadiasystems/morse-sdk";
 import { Badge } from "@/components/ui/badge";
 import { RevisionViewer } from "@/components/blog/RevisionViewer";
@@ -41,7 +41,7 @@ export function VersionTimeline({ entry, onCopyToEditor }: Props) {
               <li key={rev.id} className="flex gap-3 relative">
                 <div className="flex flex-col items-center">
                   {isPublic ? (
-                    <CheckCircle2 className="size-4 text-primary shrink-0" />
+                    <CircleCheck className="size-4 text-primary shrink-0" />
                   ) : isDraft ? (
                     <PencilLine className="size-4 text-warn shrink-0" />
                   ) : (

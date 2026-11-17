@@ -5,10 +5,10 @@ import Link from "next/link";
 import {
   ExternalLink,
   Lock,
-  MoreHorizontal,
+  Ellipsis,
   PencilLine,
   Send,
-  Trash2,
+  Trash,
 } from "lucide-react";
 import type { Entry } from "@arcadiasystems/morse-sdk";
 import {
@@ -129,7 +129,7 @@ export function EntryRow({
               className="size-8 shrink-0"
               aria-label="Open actions menu"
             >
-              <MoreHorizontal className="size-4" />
+              <Ellipsis className="size-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-44">
@@ -157,7 +157,7 @@ export function EntryRow({
                   }}
                   className="text-destructive focus:text-destructive"
                 >
-                  <Trash2 className="size-3.5" />
+                  <Trash className="size-3.5" />
                   Delete
                 </DropdownMenuItem>
               </>

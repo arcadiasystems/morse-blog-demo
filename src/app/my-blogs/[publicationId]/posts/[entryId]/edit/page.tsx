@@ -11,14 +11,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   FileUp,
-  Loader2,
+  LoaderCircle,
   Lock,
   Pencil,
   Save,
   Send,
-  Trash2,
-  TriangleAlert,
-  Unlock,
+  Trash,
+  TriangleExclamationPoint,
+  LockOpen,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useCurrentAccount } from "@mysten/dapp-kit-react";
@@ -437,7 +437,7 @@ export default function EditPostPage({
 
         <div className="flex flex-col items-center gap-5 rounded-xl border border-warn-line bg-warn-bg px-6 py-12 text-center">
           <div className="grid place-items-center size-12 rounded-full bg-warn-bg text-warn border border-warn-line">
-            <TriangleAlert className="size-5" />
+            <TriangleExclamationPoint className="size-5" />
           </div>
           <div className="flex flex-col gap-2 max-w-md">
             <h2 className="text-lg font-semibold">
@@ -466,7 +466,7 @@ export default function EditPostPage({
                   className="gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/40"
                   disabled={deletePost.isPending}
                 >
-                  <Trash2 className="size-4" />
+                  <Trash className="size-4" />
                   Delete post
                 </Button>
               </AlertDialogTrigger>
@@ -548,7 +548,7 @@ export default function EditPostPage({
 
       {blobMissing ? (
         <Alert className="bg-warn-bg border-warn-line">
-          <TriangleAlert className="size-4 text-warn" />
+          <TriangleExclamationPoint className="size-4 text-warn" />
           <AlertTitle className="text-sm">
             Re-authoring expired content
           </AlertTitle>
@@ -572,7 +572,7 @@ export default function EditPostPage({
         {isPremium ? (
           <Lock className="size-4 text-warn" />
         ) : (
-          <TriangleAlert className="size-4" />
+          <TriangleExclamationPoint className="size-4" />
         )}
         <AlertTitle className="text-sm">
           {isPremium
@@ -663,7 +663,7 @@ export default function EditPostPage({
                   disabled={unlock.isPending}
                   className="gap-2"
                 >
-                  <Unlock className="size-4" />
+                  <LockOpen className="size-4" />
                   {unlock.hasSessionKey ? "Decrypt" : "Unlock to edit"}
                 </Button>
               </div>
@@ -742,7 +742,7 @@ export default function EditPostPage({
               className="text-destructive hover:text-destructive hover:bg-destructive/10 gap-1.5 self-start"
               disabled={deletePost.isPending}
             >
-              <Trash2 className="size-3.5" />
+              <Trash className="size-3.5" />
               Delete post
             </Button>
           </AlertDialogTrigger>
@@ -821,7 +821,7 @@ export default function EditPostPage({
                       className="gap-1.5"
                     >
                       {isSaving ? (
-                        <Loader2 className="size-4 animate-spin" />
+                        <LoaderCircle className="size-4 animate-spin" />
                       ) : (
                         <Save className="size-4" />
                       )}
@@ -849,7 +849,7 @@ export default function EditPostPage({
                         className="gap-1.5"
                       >
                         {publishDraft.isPending ? (
-                          <Loader2 className="size-4 animate-spin" />
+                          <LoaderCircle className="size-4 animate-spin" />
                         ) : (
                           <Send className="size-4" />
                         )}

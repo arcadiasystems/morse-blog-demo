@@ -8,10 +8,10 @@ import {
   Eye,
   FileUp,
   Lock,
-  Loader2,
+  LoaderCircle,
   Pencil,
   Send,
-  TriangleAlert,
+  TriangleExclamationPoint,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useCurrentAccount } from "@mysten/dapp-kit-react";
@@ -261,7 +261,7 @@ export default function WritePostPage({
       </div>
 
       <Alert className="bg-card/40 border-border/60">
-        <TriangleAlert className="size-4" />
+        <TriangleExclamationPoint className="size-4" />
         <AlertTitle className="text-sm">
           Walrus storage is temporary
         </AlertTitle>
@@ -304,7 +304,7 @@ export default function WritePostPage({
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="size-4 animate-spin" />
+                  <LoaderCircle className="size-4 animate-spin" />
                   Publishing...
                 </>
               ) : premium ? (

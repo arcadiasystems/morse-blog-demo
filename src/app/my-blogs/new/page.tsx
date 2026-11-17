@@ -3,7 +3,7 @@
 import { FormEvent, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, BookPlus, Loader2 } from "lucide-react";
+import { ArrowLeft, BookPlus, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useCurrentAccount } from "@mysten/dapp-kit-react";
 import { Button } from "@/components/ui/button";
@@ -127,7 +127,7 @@ export default function NewBlogPage() {
             >
               {create.isPending ? (
                 <>
-                  <Loader2 className="size-4 animate-spin" />
+                  <LoaderCircle className="size-4 animate-spin" />
                   Confirming...
                 </>
               ) : (

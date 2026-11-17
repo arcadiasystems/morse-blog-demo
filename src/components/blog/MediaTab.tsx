@@ -1,7 +1,7 @@
 "use client";
 
 import { DragEvent, useCallback, useState } from "react";
-import { FileUp, Image as ImageIcon, Info, Loader2, Upload } from "lucide-react";
+import { FileUp, Image as ImageIcon, Info, LoaderCircle, Upload } from "lucide-react";
 import { toast } from "sonner";
 import type { Publication } from "@arcadiasystems/morse-sdk";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -142,7 +142,7 @@ export function MediaTab({ publicationId, publication }: Props) {
         />
         <div className="grid place-items-center size-12 rounded-full bg-primary/10 text-primary border border-primary/30">
           {upload.isPending ? (
-            <Loader2 className="size-5 animate-spin" />
+            <LoaderCircle className="size-5 animate-spin" />
           ) : (
             <Upload className="size-5" />
           )}

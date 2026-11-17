@@ -4,9 +4,9 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowRightLeft,
-  Loader2,
-  ShieldAlert,
-  Trash2,
+  LoaderCircle,
+  ShieldExclamationPoint,
+  Trash,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -132,7 +132,7 @@ export function DangerZone({ publicationId }: { publicationId: string }) {
   return (
     <div className="rounded-xl border border-destructive/40 bg-destructive/5 overflow-hidden">
       <div className="p-5 border-b border-destructive/30 flex items-center gap-2">
-        <ShieldAlert className="size-4 text-destructive" />
+        <ShieldExclamationPoint className="size-4 text-destructive" />
         <h2 className="text-sm font-semibold">Danger zone</h2>
       </div>
 
@@ -181,7 +181,7 @@ export function DangerZone({ publicationId }: { publicationId: string }) {
                   className="gap-1.5 border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
                 >
                   {transfer.isPending ? (
-                    <Loader2 className="size-4 animate-spin" />
+                    <LoaderCircle className="size-4 animate-spin" />
                   ) : (
                     <ArrowRightLeft className="size-4" />
                   )}
@@ -267,9 +267,9 @@ export function DangerZone({ publicationId }: { publicationId: string }) {
                 className="bg-destructive text-white hover:bg-destructive/90 gap-1.5"
               >
                 {del.isPending ? (
-                  <Loader2 className="size-4 animate-spin" />
+                  <LoaderCircle className="size-4 animate-spin" />
                 ) : (
-                  <Trash2 className="size-4" />
+                  <Trash className="size-4" />
                 )}
                 Delete blog
               </Button>
