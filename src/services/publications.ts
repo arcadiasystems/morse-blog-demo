@@ -2,6 +2,7 @@ import type {
   OwnerCapId,
   Publication,
   PublicationId,
+  PublisherCap,
   RpcPublicationReader,
   SuiAddress,
 } from "@arcadiasystems/morse-sdk";
@@ -43,12 +44,33 @@ export async function listOwnedPublicationsWithDetails(
 }
 
 /**
+ * Drops the PublisherCaps whose publication owner has revoked them. Revoking
+ * adds the cap id to a denylist on the publication and leaves the cap object
+ * in the holder's wallet, so `listPublisherCapsOwnedBy` returns a revoked cap
+ * exactly like a live one; it only fails once a transaction uses it.
+ */
+export async function withoutRevokedPublisherCaps(
+  reader: RpcPublicationReader,
+  caps: readonly PublisherCap[],
+  signal?: AbortSignal,
+): Promise<PublisherCap[]> {
+  const revoked = await Promise.all(
+    caps.map((cap) =>
+      reader.isPublisherCapRevoked(cap.publicationId, cap.id, signal),
+    ),
+  );
+  return caps.filter((_, index) => !revoked[index]);
+}
+
+/**
  * Lists publications the wallet can write to via a PublisherCap but does
  * NOT own (no OwnerCap). This is the "shared with me" / co-author set.
  *
  * A publication the wallet both owns and holds a publisher cap on is
  * excluded here (it belongs in the owned list). We resolve ownership by
- * cross-referencing the owned set's publication ids.
+ * cross-referencing the owned set's publication ids. A publication on which
+ * every cap the wallet holds has been revoked is excluded too: the wallet
+ * can no longer write to it.
  */
 export async function listCoauthoredPublicationsWithDetails(
   reader: RpcPublicationReader,
@@ -62,13 +84,15 @@ export async function listCoauthoredPublicationsWithDetails(
 
   const ownedIds = new Set(ownedPage.results.map((h) => h.publicationId));
 
-  // Unique publication ids from publisher caps that we do NOT own.
+  const liveCaps = await withoutRevokedPublisherCaps(
+    reader,
+    capPage.results.filter((cap) => !ownedIds.has(cap.publicationId)),
+    signal,
+  );
+
+  // Unique publication ids from live publisher caps that we do NOT own.
   const coauthoredIds = Array.from(
-    new Set(
-      capPage.results
-        .map((cap) => cap.publicationId)
-        .filter((id) => !ownedIds.has(id)),
-    ),
+    new Set(liveCaps.map((cap) => cap.publicationId)),
   );
 
   const details = await Promise.all(
