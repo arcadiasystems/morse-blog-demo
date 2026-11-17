@@ -123,9 +123,12 @@ export default function EditPostPage({
       ? entry.revisions[entry.publicHead]
       : draftRev;
   const blobMissing = content.data?.blobMissing ?? false;
+  // Only true when the SDK confirmed the lease ended; a missing blob may
+  // also be not yet available or deleted, and the copy must not claim more.
+  const blobExpired = content.data?.blobExpired ?? false;
   // A missing blob also reports content === null, but it's a text entry whose
-  // bytes expired - route it to the editor (with a recovery notice), not the
-  // binary preview.
+  // bytes are not on Walrus - route it to the editor (with a recovery notice),
+  // not the binary preview.
   const isBinaryEntry =
     content.data?.content === null && !isPremium && !blobMissing;
   const entryContentType = content.data?.contentType ?? "text/markdown";
@@ -441,17 +444,19 @@ export default function EditPostPage({
           </div>
           <div className="flex flex-col gap-2 max-w-md">
             <h2 className="text-lg font-semibold">
-              Content no longer available
+              {blobExpired
+                ? "Content no longer available"
+                : "Content not available on Walrus"}
             </h2>
             <p className="text-sm text-muted-foreground">
-              This post&apos;s body was stored on Walrus for a fixed number of
-              epochs, and that storage lease has expired. The bytes are gone and
-              the original text cannot be recovered. The on-chain entry and its
-              title are still intact.
+              {blobExpired
+                ? "This post's body was stored on Walrus for a fixed number of epochs, and that storage lease has expired. The bytes are gone and the original text cannot be recovered. The on-chain entry and its title are still intact."
+                : "The Walrus aggregator does not have this post's body. If it was saved in the last minute it may not be available yet: reload shortly. Otherwise the blob was deleted or its storage lease ended, and the original text cannot be recovered. The on-chain entry and its title are still intact."}
             </p>
             <p className="text-sm text-muted-foreground">
-              You can re-write the post (new content is stored for ~50 epochs)
-              or delete it to clean up.
+              {blobExpired
+                ? "You can re-write the post (new content is stored for ~50 epochs) or delete it to clean up."
+                : "If it stays missing, you can re-write the post (new content is stored for ~50 epochs) or delete it to clean up."}
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
@@ -537,7 +542,9 @@ export default function EditPostPage({
         </h1>
         <p className="text-sm text-muted-foreground">
           {blobMissing
-            ? "Re-writing this post from scratch. The original body expired on Walrus and is unrecoverable. New content is stored for ~50 epochs."
+            ? blobExpired
+              ? "Re-writing this post from scratch. The original body expired on Walrus and is unrecoverable. New content is stored for ~50 epochs."
+              : "Re-writing this post from scratch. The original body is not on Walrus. New content is stored for ~50 epochs."
             : isPremium
               ? "Premium posts are encrypted client-side. The current draft is the visible version, with no separate publish step."
               : isBinaryEntry
@@ -550,13 +557,17 @@ export default function EditPostPage({
         <Alert className="bg-warn-bg border-warn-line">
           <TriangleExclamationPoint className="size-4 text-warn" />
           <AlertTitle className="text-sm">
-            Re-authoring expired content
+            {blobExpired
+              ? "Re-authoring expired content"
+              : "Re-authoring missing content"}
           </AlertTitle>
           <AlertDescription className="text-xs text-muted-foreground">
-            The original body is gone from Walrus and cannot be recovered. This
-            is a fresh write. Type the content, then{" "}
+            {blobExpired
+              ? "The original body is gone from Walrus and cannot be recovered."
+              : "The Walrus aggregator does not have the original body."}{" "}
+            This is a fresh write. Type the content, then{" "}
             <span className="text-foreground font-medium">Save draft</span> and
-            Publish to replace the dead revision with a new blob stored for ~50
+            Publish to replace the missing revision with a new blob stored for ~50
             epochs.
           </AlertDescription>
         </Alert>

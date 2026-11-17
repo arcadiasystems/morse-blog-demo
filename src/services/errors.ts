@@ -1,4 +1,5 @@
 import {
+  BlobExpiredError,
   ConfigurationError,
   ContractAbortError,
   MorseError,
@@ -202,10 +203,20 @@ export function mapSdkError(err: unknown): MappedError {
     };
   }
   if (err instanceof NotFoundError) {
+    // Expiry is only claimed when the SDK read the blob's on-chain lease
+    // and saw it had ended. A bare 404 from the aggregator can also mean the
+    // blob is not available yet or was deleted.
+    if (err instanceof BlobExpiredError) {
+      return {
+        title: "Walrus blob expired",
+        body: `This blob's storage lease ended at Walrus epoch ${err.endEpoch}, so it is no longer stored (Walrus blobs are not permanent). Open the post and re-save to restore it with a fresh blob.`,
+        severity: "warning",
+      };
+    }
     if (err.resource === "blob") {
       return {
         title: "Walrus blob unavailable",
-        body: "The aggregator does not have this blob. If it was just uploaded, wait ~30s for testnet propagation and retry. Otherwise its storage lease has expired (Walrus blobs are not permanent). Open the post and re-save to restore it with a fresh blob.",
+        body: "The aggregator does not have this blob. If it was just uploaded, wait ~30s for testnet propagation and retry. Otherwise it may have been deleted, or its storage lease may have ended (Walrus blobs are not permanent). If it stays missing, open the post and re-save to restore it with a fresh blob.",
         severity: "warning",
       };
     }

@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import {
+  BlobExpiredError,
   NotFoundError,
   toPublicationId,
   type Entry,
@@ -24,11 +25,17 @@ export type EntryWithContent = {
   /** Which head we sourced the content from. */
   source: "draftHead" | "publicHead" | "empty";
   /**
-   * True when the on-chain entry exists but its Walrus blob is gone (storage
-   * lease expired or testnet wiped). The entry metadata is still valid; the
-   * body bytes are unrecoverable and the post must be re-saved to heal it.
+   * True when the on-chain entry exists but the Walrus aggregator does not
+   * have its blob: not available yet, deleted, or its storage lease ended.
+   * The entry metadata is still valid; if the blob stays missing the post
+   * must be re-saved to heal it.
    */
   blobMissing: boolean;
+  /**
+   * True only when the SDK confirmed from the blob's on-chain lease that it
+   * has expired. A missing blob alone never sets this.
+   */
+  blobExpired: boolean;
 };
 
 const DECODER = new TextDecoder();
@@ -87,6 +94,7 @@ export function useEntryContent(
           contentType: "text/markdown",
           source: "empty",
           blobMissing: false,
+          blobExpired: false,
         };
       }
 
@@ -98,6 +106,7 @@ export function useEntryContent(
           contentType: revision?.contentType ?? "text/markdown",
           source: head.source,
           blobMissing: false,
+          blobExpired: false,
         };
       }
 
@@ -111,11 +120,12 @@ export function useEntryContent(
           contentType: revision.contentType,
           source: head.source,
           blobMissing: false,
+          blobExpired: false,
         };
       }
 
-      // Text path: fetch bytes and UTF-8 decode. A missing blob (expired
-      // storage lease / testnet wipe) is NOT a hard error - we still return
+      // Text path: fetch bytes and UTF-8 decode. A missing blob (not yet
+      // available, deleted, or lease ended) is NOT a hard error - we still return
       // the entry so the editor can offer a re-save instead of a dead end.
       try {
         const bytes = await walrusRead.readBlobRef(revision.blobRef);
@@ -125,6 +135,7 @@ export function useEntryContent(
           contentType: revision.contentType,
           source: head.source,
           blobMissing: false,
+          blobExpired: false,
         };
       } catch (err) {
         if (err instanceof NotFoundError && err.resource === "blob") {
@@ -134,6 +145,7 @@ export function useEntryContent(
             contentType: revision.contentType,
             source: head.source,
             blobMissing: true,
+            blobExpired: err instanceof BlobExpiredError,
           };
         }
         throw err;

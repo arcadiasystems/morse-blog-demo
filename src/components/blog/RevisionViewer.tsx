@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Copy, FileText, Lock, X } from "lucide-react";
 import { toast } from "sonner";
 import {
+  BlobExpiredError,
   NotFoundError,
   type Entry,
   type Revision,
@@ -198,9 +199,11 @@ export function RevisionViewer({
         <div className="mt-4 flex items-center justify-between gap-3 pt-3 border-t border-border/60">
           <p className="text-[11px] text-muted-foreground">
             <FileText className="size-3 inline -mt-0.5 mr-1" />
-            {error instanceof NotFoundError && error.resource === "blob"
+            {error instanceof BlobExpiredError
               ? "This revision's content has expired on Walrus and can't be recovered. Re-write the post from the editor to create a fresh version."
-              : "Revisions are immutable. To “rollback”, copy this content into the editor and save as a new draft."}
+              : error instanceof NotFoundError && error.resource === "blob"
+                ? "The Walrus aggregator does not have this revision's content. It may not be available yet, or it was deleted or its storage lease ended. If it stays missing, re-write the post from the editor to create a fresh version."
+                : "Revisions are immutable. To “rollback”, copy this content into the editor and save as a new draft."}
           </p>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={onClose}>
