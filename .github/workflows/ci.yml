@@ -13,7 +13,7 @@ jobs:
     name: checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # npm, not bun: the repo carries both package-lock.json and bun.lock, has
       # no vercel.json and no packageManager field, and with that pair Vercel's
       # lockfile detection picks npm. CI installs from the same lockfile the
