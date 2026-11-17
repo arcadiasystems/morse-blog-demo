@@ -18,7 +18,7 @@ jobs:
       # no vercel.json and no packageManager field, and with that pair Vercel's
       # lockfile detection picks npm. CI installs from the same lockfile the
       # deploy does. Node is pinned because package.json declares no engines.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "24"
           cache: npm
