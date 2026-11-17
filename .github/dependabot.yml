@@ -1,0 +1,36 @@
+version: 2
+updates:
+  # npm, not bun: package-lock.json is the lockfile Vercel installs from and
+  # the one CI runs npm ci against. Dependabot will not touch bun.lock.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 3
+    groups:
+      # morse-sdk declares exact, mutually compatible Mysten versions as peer
+      # dependencies (0.9.0 wants @mysten/sui 2.36.x, 0.11.0 wants 2.38.x),
+      # so bumping any one of these alone fails to install. They move in one
+      # pull request or not at all.
+      morse-mysten-stack:
+        patterns:
+          - "@arcadiasystems/morse-sdk"
+          - "@mysten/sui"
+          - "@mysten/walrus"
+          - "@mysten/seal"
+    ignore:
+      # Each dapp-kit-core release raises its @mysten/sui peer floor
+      # (1.6.38 needs ^2.36.0, 1.6.43 needs ^2.39.1) and dapp-kit-react pins
+      # the matching core, so their latest versions demand a @mysten/sui minor
+      # that morse-sdk's peer range rejects. Pick the dapp-kit pair by hand
+      # when the stack above moves.
+      - dependency-name: "@mysten/dapp-kit-core"
+      - dependency-name: "@mysten/dapp-kit-react"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 2
