@@ -1,0 +1,53 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # npm, not bun: the repo carries both package-lock.json and bun.lock, has
+      # no vercel.json and no packageManager field, and with that pair Vercel's
+      # lockfile detection picks npm. CI installs from the same lockfile the
+      # deploy does. Node is pinned because package.json declares no engines.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      # next build also runs the TypeScript check; there is no separate
+      # typecheck script. No environment is needed: the only variable read,
+      # NEXT_PUBLIC_DEMO_PUBLICATION_ID, falls back to a committed public ID.
+      - name: Build
+        run: npm run build
+
+  # The one check the ruleset on main requires. It runs on every pull request,
+  # even when a job above fails or is cancelled, so the required status always
+  # reports instead of sitting at "expected".
+  ci-ok:
+    name: ci-ok
+    if: always()
+    needs: [checks]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail unless every needed job succeeded
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "needed job results: $RESULTS"
+          for result in $RESULTS; do
+            if [ "$result" != "success" ]; then
+              exit 1
+            fi
+          done
