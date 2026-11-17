@@ -42,14 +42,14 @@ export function useMyPublications() {
  * section so co-authors can find blogs they've been granted access to.
  */
 export function useCoauthoredPublications() {
-  const { reader, address } = useMorseReader();
+  const { client, config, address } = useMorseReader();
 
   return useQuery<OwnedPublicationWithDetails[]>({
     queryKey: coauthoredPublicationsKey(address),
     queryFn: async ({ signal }) => {
       if (!address) return [];
       return listCoauthoredPublicationsWithDetails(
-        reader,
+        { client, config },
         toSuiAddress(address),
         signal,
       );
