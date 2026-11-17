@@ -1,7 +1,7 @@
 version: 2
 updates:
-  # npm, not bun: package-lock.json is the lockfile Vercel installs from and
-  # the one CI runs npm ci against. Dependabot will not touch bun.lock.
+  # npm is the project's one package manager: package-lock.json is the only
+  # lockfile, the one Vercel installs from and the one CI runs npm ci against.
   - package-ecosystem: npm
     directory: /
     schedule:

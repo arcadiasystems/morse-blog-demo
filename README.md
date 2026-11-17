@@ -75,11 +75,11 @@ src/
 
 ## Run locally
 
-Requires [Bun](https://bun.sh) (the project uses bun for installs + dev) and Node.js 24, the version `engines` in `package.json` gives the Vercel build and the one CI uses. Node 26 is held back for now: an aborted `fetch` can crash a Node 26 process ([nodejs/undici#6143](https://github.com/nodejs/undici/issues/6143)), and the public pages read Sui and Walrus on the server.
+Requires Node.js 24 and npm (the project's one package manager; `package-lock.json` is the only lockfile, and it is what CI and the Vercel deploy install from). Node 24 is the version `engines` in `package.json` gives the Vercel build and the one CI uses. Node 26 is held back for now: an aborted `fetch` can crash a Node 26 process ([nodejs/undici#6143](https://github.com/nodejs/undici/issues/6143)), and the public pages read Sui and Walrus on the server.
 
 ```sh
-bun install
-bun dev
+npm install
+npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000), connect a wallet on Sui testnet, and create a publication.

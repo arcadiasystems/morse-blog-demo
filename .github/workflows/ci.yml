@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # npm, not bun: the repo carries both package-lock.json and bun.lock, has
-      # no vercel.json and no packageManager field, and with that pair Vercel's
-      # lockfile detection picks npm. CI installs from the same lockfile the
-      # deploy does.
+      # npm is the project's one package manager (packageManager in
+      # package.json). package-lock.json is the only lockfile, so Vercel's
+      # lockfile detection installs with npm and CI installs from the same
+      # lockfile the deploy does.
       #
       # Node 24, the same major package.json's engines field gives Vercel.
       # Node 26 is held back: its bundled undici crashes the process with an
