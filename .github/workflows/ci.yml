@@ -31,6 +31,14 @@ jobs:
       # NEXT_PUBLIC_DEMO_PUBLICATION_ID, falls back to a committed public ID.
       - name: Build
         run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps --only-shell chromium
+      # Runs against the build above. The public-page tests read the seeded
+      # demo publication from Testnet. The wallet tests sign real Testnet
+      # transactions and need E2E_SUI_PRIVATE_KEY, which CI does not have:
+      # they skip here and are run locally (see the README).
+      - name: End-to-end tests
+        run: npm run e2e
 
   # The one check the ruleset on main requires. It runs on every pull request,
   # even when a job above fails or is cancelled, so the required status always

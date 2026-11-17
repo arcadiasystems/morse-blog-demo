@@ -86,6 +86,27 @@ Open [http://localhost:3000](http://localhost:3000), connect a wallet on Sui tes
 
 You'll need a small amount of testnet SUI for gas. Drop your address into the [Sui testnet faucet](https://faucet.sui.io/). WAL is not required because the demo uses a Walrus HTTP publisher that absorbs storage cost.
 
+## End-to-end tests
+
+A small [Playwright](https://playwright.dev) suite in `e2e/` drives the production build in Chromium:
+
+```sh
+npx playwright install chromium   # once
+npm run build
+npm run e2e
+```
+
+- **Public pages** (`e2e/public.spec.ts`) need nothing: they check that the seeded demo blog and its posts are rendered on the server. CI runs these on every pull request.
+- **Wallet flows** (`e2e/authoring.spec.ts`) sign real transactions on Sui Testnet: create a blog, publish a post, edit it and publish the revision, save an encrypted draft and decrypt it, issue and revoke a publisher cap (including a failed revocation read), and delete a post. They are skipped unless a funded Testnet key is in the environment:
+
+  ```sh
+  E2E_SUI_PRIVATE_KEY="$(sui keytool export --key-identity <address> --json | jq -r .exportedPrivateKey)" npm run e2e
+  ```
+
+  A full run costs roughly 0.1 testnet SUI in gas and no WAL (the Walrus publisher pays for storage). The co-author in the cap tests is a throwaway key unless `E2E_SUI_COAUTHOR_PRIVATE_KEY` names a second wallet; it needs no funds.
+
+The key is read by the test process only. The suite registers its own Wallet Standard wallet in the test browser, and that wallet asks the test process for every signature, so the key never reaches the page, the app bundle or the repository. It signs for `sui:testnet` and refuses every other chain. Each run leaves one small `E2E <id>` blog on Testnet.
+
 ## Deploy your own
 
 This is a static-export-friendly Next App Router project — Vercel auto-detects it.
