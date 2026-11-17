@@ -21,10 +21,10 @@ updates:
           - "@mysten/seal"
     ignore:
       # Each dapp-kit-core release raises its @mysten/sui peer floor
-      # (1.6.38 needs ^2.36.0, 1.6.43 needs ^2.39.1) and dapp-kit-react pins
-      # the matching core, so their latest versions demand a @mysten/sui minor
-      # that morse-sdk's peer range rejects. Pick the dapp-kit pair by hand
-      # when the stack above moves.
+      # (1.6.38 needs ^2.36.0, 1.6.43 needs ^2.39.1) and dapp-kit-react
+      # requires the matching core or newer, so a new dapp-kit release can
+      # demand a @mysten/sui minor that morse-sdk's peer range rejects. Pick
+      # the dapp-kit pair by hand when the stack above moves.
       - dependency-name: "@mysten/dapp-kit-core"
       - dependency-name: "@mysten/dapp-kit-react"
 

@@ -23,6 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyPublication } from "@/components/feedback/EmptyPublication";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
+import { toastPublisherCapUnavailable } from "@/components/feedback/publisher-cap-toast";
 import { AdminHeader } from "@/components/blog/AdminHeader";
 import { CollectionSection } from "@/components/blog/CollectionSection";
 import { DangerZone } from "@/components/blog/DangerZone";
@@ -58,9 +59,10 @@ export default function PublicationAdminPage({
 
   const handleDelete = (entryId: number, collectionName: string) => {
     if (!cap.data) {
-      toast.error("Missing publisher cap", {
-        description: "Cannot delete without a PublisherCap for this blog.",
-      });
+      toastPublisherCapUnavailable(
+        cap,
+        "Cannot delete without a PublisherCap for this blog.",
+      );
       return;
     }
     deletePost.mutate(

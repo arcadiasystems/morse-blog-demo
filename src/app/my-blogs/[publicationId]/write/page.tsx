@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/tooltip";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
+import { PublisherCapCheckError } from "@/components/feedback/PublisherCapCheckError";
 import { showPublishToast } from "@/components/feedback/PublishToast";
 import { StatusIndicator } from "@/components/feedback/StatusIndicator";
 import { Field } from "@/components/forms/Field";
@@ -166,6 +167,18 @@ export default function WritePostPage({
               ? publication.error.message
               : "Couldn't load this publication."
           }
+        />
+      </div>
+    );
+  }
+
+  if (cap.isError) {
+    return (
+      <div className="flex flex-col gap-6 py-4 sm:py-8 max-w-3xl">
+        <BackLink publicationId={publicationId} />
+        <PublisherCapCheckError
+          onRetry={() => cap.refetch()}
+          retrying={cap.isFetching}
         />
       </div>
     );

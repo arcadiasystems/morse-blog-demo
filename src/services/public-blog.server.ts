@@ -2,8 +2,11 @@ import "server-only";
 import {
   type BlobRef,
   type Entry,
+  NotFoundError,
   type Publication,
+  type PublicationId,
   toPublicationId,
+  ValidationError,
 } from "@arcadiasystems/morse-sdk";
 import { DEFAULT_COLLECTION_NAME } from "@/lib/morse-config";
 import { getServerMorseReader } from "@/services/morse-reader.server";
@@ -14,14 +17,43 @@ export type PublicBlogData = {
   entries: Entry[];
 };
 
+/**
+ * A publication id from the URL, or null when the path segment is not a Sui
+ * object id at all (`/favicon.ico`, a typo): nothing can exist there.
+ */
+function publicationIdFromPath(segment: string): PublicationId | null {
+  try {
+    return toPublicationId(segment);
+  } catch (error) {
+    if (error instanceof ValidationError) return null;
+    throw error;
+  }
+}
+
+/**
+ * Logs a failed public read and hands the error back for the caller to
+ * throw. Only "the chain has no such publication, collection or entry" is a
+ * 404; an RPC failure or an entry that will not decode is a real fault, and
+ * rendering it as "not found" would hide it from readers and from the logs.
+ */
+function publicReadFailure(what: string, error: unknown): unknown {
+  console.error(`[public-blog] Could not load ${what}`, error);
+  return error;
+}
+
+/**
+ * The public blog index data, or null when the publication does not exist.
+ * @throws When the read fails for any other reason; the route's error
+ *   boundary renders it.
+ */
 export async function loadPublicBlog(
   publicationId: string,
 ): Promise<PublicBlogData | null> {
+  const id = publicationIdFromPath(publicationId);
+  if (id === null) return null;
   const { reader } = getServerMorseReader();
   try {
-    const publication = await reader.getPublication(
-      toPublicationId(publicationId),
-    );
+    const publication = await reader.getPublication(id);
     const hasPosts = publication.collections.some(
       (c) => c.name === DEFAULT_COLLECTION_NAME,
     );
@@ -36,29 +68,40 @@ export async function loadPublicBlog(
       entries.sort((a, b) => b.id - a.id);
     }
     return { publication, entries };
-  } catch {
-    return null;
+  } catch (error) {
+    if (error instanceof NotFoundError) return null;
+    throw publicReadFailure(`publication ${id}`, error);
   }
 }
 
+/**
+ * One public entry with its publication, or null when either does not exist.
+ * @throws When the read fails for any other reason; the route's error
+ *   boundary renders it.
+ */
 export async function loadPublicEntry(
   publicationId: string,
   entryId: number,
   collectionName: string = DEFAULT_COLLECTION_NAME,
 ): Promise<{ publication: Publication; entry: Entry } | null> {
+  const id = publicationIdFromPath(publicationId);
+  // Entry ids are non-negative integers; `/1.5` or `/-1` names nothing.
+  if (id === null || !Number.isInteger(entryId) || entryId < 0) return null;
   const { reader } = getServerMorseReader();
   try {
-    const publication = await reader.getPublication(
-      toPublicationId(publicationId),
-    );
+    const publication = await reader.getPublication(id);
     const entry = await reader.getEntry(
       publication.id,
       collectionName,
       entryId,
     );
     return { publication, entry };
-  } catch {
-    return null;
+  } catch (error) {
+    if (error instanceof NotFoundError) return null;
+    throw publicReadFailure(
+      `entry ${collectionName}:${entryId} of publication ${id}`,
+      error,
+    );
   }
 }
 

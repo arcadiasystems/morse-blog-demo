@@ -121,13 +121,22 @@ export function PremiumUnlock({
     );
   }
 
+  // A lookup that failed is "unknown", never "denied": the reader may hold
+  // a live cap that this page could not confirm.
   const access: Access = !account
     ? "disconnected"
-    : entries.isPending || cap.isPending
-      ? "checking"
-      : cap.data
-        ? "granted"
-        : "denied";
+    : entries.isError || cap.isError
+      ? "unknown"
+      : entries.isPending || cap.isPending
+        ? "checking"
+        : cap.data
+          ? "granted"
+          : "denied";
+  const rechecking = entries.isFetching || cap.isFetching;
+  const recheck = () => {
+    if (entries.isError) entries.refetch();
+    if (cap.isError) cap.refetch();
+  };
 
   return (
     <div className={`${styles.lock} ${className ?? ""}`}>
@@ -142,6 +151,8 @@ export function PremiumUnlock({
             access={access}
             pendingLabel={unlock.isPending ? PENDING_LABEL[unlock.phase] : null}
             hasSessionKey={unlock.hasSessionKey}
+            rechecking={rechecking}
+            onRecheck={recheck}
             onUnlock={() =>
               unlock.hasSessionKey ? runUnlock() : setConfirming(true)
             }
@@ -157,18 +168,23 @@ export function PremiumUnlock({
   );
 }
 
-type Access = "disconnected" | "checking" | "denied" | "granted";
+type Access = "disconnected" | "checking" | "unknown" | "denied" | "granted";
 
 function UnlockCard({
   access,
   pendingLabel,
   hasSessionKey,
+  rechecking,
+  onRecheck,
   onUnlock,
 }: {
   access: Access;
   /** Progress label while an unlock runs; null when idle. */
   pendingLabel: string | null;
   hasSessionKey: boolean;
+  /** True while a failed access lookup is being repeated. */
+  rechecking: boolean;
+  onRecheck: () => void;
   onUnlock: () => void;
 }) {
   switch (access) {
@@ -192,6 +208,25 @@ function UnlockCard({
           <p>Looking up your publisher cap for this blog on Sui.</p>
           <button type="button" className="btn btn-ultra" disabled>
             Checking access
+          </button>
+        </>
+      );
+    case "unknown":
+      return (
+        <>
+          <CardTitle>Could not check your access</CardTitle>
+          <p role="alert">
+            The read from Sui that checks your access to this post did not
+            complete, so this page cannot tell yet whether you can unlock it.
+            Nothing changed on chain.
+          </p>
+          <button
+            type="button"
+            className="btn btn-ultra"
+            disabled={rechecking}
+            onClick={onRecheck}
+          >
+            {rechecking ? "Trying again" : "Try again"}
           </button>
         </>
       );

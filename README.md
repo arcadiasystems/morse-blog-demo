@@ -52,7 +52,7 @@ Premium entries are created with `addEncryptedEntry` and live as encrypted draft
 - **Server components** render the public reader (`/[publicationId]` index + post pages) so first paint is fast and link previews include real titles
 - **Client components** drive every authoring flow (wallet, write, edit) via `useMorse()` which assembles `{ adapter, signer, reader, walrusRead, walrusWrite, seal, config, client }`
 - **HTTP Walrus adapters** (`HttpAggregatorReadAdapter` + `HttpPublisherWriteAdapter`) so the demo doesn't need WAL in your wallet — the publisher absorbs storage cost, every public-post write is 1 popup
-- **Pinned Mysten substrate** matching morse-sdk 0.9's peer deps: `@mysten/sui@2.36.0`, `@mysten/walrus@1.2.35`, `@mysten/seal@1.5.0`
+- **Pinned Mysten substrate** matching morse-sdk 0.12's peer deps: `@mysten/sui@2.39.1`, `@mysten/walrus@1.2.39`, `@mysten/seal@1.5.4`
 
 ```
 src/

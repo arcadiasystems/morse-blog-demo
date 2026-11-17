@@ -12,10 +12,33 @@ import {
   type RevokePublisherCapResult,
   type TransferOwnershipResult,
 } from "@arcadiasystems/morse-sdk";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  type QueryClient,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useMorse } from "@/hooks/use-morse";
-import { myPublicationsKey } from "@/hooks/use-publications";
-import { publisherCapKey } from "@/hooks/use-publisher-cap";
+import {
+  coauthoredPublicationsKey,
+  myPublicationsKey,
+} from "@/hooks/use-publications";
+import { publisherCapsKey } from "@/hooks/use-publisher-cap";
+
+/**
+ * Re-reads what the connected wallet can write to after a cap was issued or
+ * revoked. The cap may be one this wallet holds itself (an owner revoking
+ * their own cap, or issuing one to their own address), so its "New post"
+ * actions and "Shared with me" list must not keep the answer from before.
+ */
+function invalidateWriteAccess(
+  queryClient: QueryClient,
+  address: string | undefined,
+): void {
+  queryClient.invalidateQueries({ queryKey: publisherCapsKey(address) });
+  queryClient.invalidateQueries({
+    queryKey: coauthoredPublicationsKey(address),
+  });
+}
 
 export type IssueInput = {
   publicationId: string;
@@ -37,10 +60,7 @@ export function useIssuePublisherCap() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: publisherCapKey(morse?.account?.address, ""),
-        exact: false,
-      });
+      invalidateWriteAccess(queryClient, morse?.account?.address);
     },
   });
 }
@@ -65,10 +85,7 @@ export function useRevokePublisherCap() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: publisherCapKey(morse?.account?.address, ""),
-        exact: false,
-      });
+      invalidateWriteAccess(queryClient, morse?.account?.address);
     },
   });
 }

@@ -13,6 +13,7 @@ import { StatusIndicator } from "@/components/feedback/StatusIndicator";
 import { MediaGrid } from "@/components/blog/MediaGrid";
 import { useEntries } from "@/hooks/use-entries";
 import { useMorse } from "@/hooks/use-morse";
+import { toastPublisherCapUnavailable } from "@/components/feedback/publisher-cap-toast";
 import { usePublisherCap } from "@/hooks/use-publisher-cap";
 import { useUploadMedia } from "@/hooks/use-upload-media";
 import {
@@ -46,9 +47,10 @@ export function MediaTab({ publicationId, publication }: Props) {
   const handleFiles = useCallback(
     async (files: FileList | File[]) => {
       if (!cap.data) {
-        toast.error("Missing publisher cap", {
-          description: "Cannot upload without a PublisherCap for this blog.",
-        });
+        toastPublisherCapUnavailable(
+          cap,
+          "Cannot upload without a PublisherCap for this blog.",
+        );
         return;
       }
       const arr = Array.from(files);
@@ -81,7 +83,7 @@ export function MediaTab({ publicationId, publication }: Props) {
         });
       }
     },
-    [cap.data, publicationId, hasMediaCollection, upload],
+    [cap, publicationId, hasMediaCollection, upload],
   );
 
   const onDragOver = useCallback((e: DragEvent<HTMLLabelElement>) => {
