@@ -16,6 +16,9 @@
     "lint": "eslint",
     "e2e": "playwright test"
   },
+  "engines": {
+    "node": "24.x"
+  },
   "dependencies": {
     "@arcadiasystems/morse-sdk": "0.12.0",
     "@mysten/dapp-kit-core": "1.6.43",

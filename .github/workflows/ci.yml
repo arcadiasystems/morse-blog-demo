@@ -17,7 +17,13 @@ jobs:
       # npm, not bun: the repo carries both package-lock.json and bun.lock, has
       # no vercel.json and no packageManager field, and with that pair Vercel's
       # lockfile detection picks npm. CI installs from the same lockfile the
-      # deploy does. Node is pinned because package.json declares no engines.
+      # deploy does.
+      #
+      # Node 24, the same major package.json's engines field gives Vercel.
+      # Node 26 is held back: its bundled undici crashes the process with an
+      # uncaught "socket idle timeout" some seconds after a fetch is aborted
+      # on an open HTTP/2 session (https://github.com/nodejs/undici/issues/6143),
+      # and the server-rendered pages read Sui and Walrus with fetch.
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
