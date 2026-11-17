@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { BookOpen, Plus, Users } from "lucide-react";
 import { useCurrentAccount } from "@mysten/dapp-kit-react";
@@ -79,19 +80,24 @@ export default function MyBlogsPage() {
       )}
 
       {/* Shared with me (co-author via PublisherCap, no OwnerCap) */}
-      {shared.data && shared.data.length > 0 ? (
-        <section className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-lg font-semibold tracking-tight flex items-center gap-2">
-              <Users className="size-4 text-muted-foreground" />
-              Shared with me
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Blogs where you hold a publisher cap but not ownership. You can
-              write posts; only the owner can manage members or delete the
-              blog.
-            </p>
-          </div>
+      {shared.isError ? (
+        <SharedSection>
+          <ErrorState
+            title="Couldn't load blogs shared with you"
+            description="The read from Sui that checks your publisher caps did not complete, so this list can't be shown yet. Your caps are still in your wallet."
+            action={
+              <Button
+                variant="outline"
+                onClick={() => shared.refetch()}
+                disabled={shared.isFetching}
+              >
+                {shared.isFetching ? "Trying again" : "Try again"}
+              </Button>
+            }
+          />
+        </SharedSection>
+      ) : shared.data && shared.data.length > 0 ? (
+        <SharedSection>
           <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {shared.data.map((item) => (
               <PublicationCard
@@ -101,9 +107,28 @@ export default function MyBlogsPage() {
               />
             ))}
           </div>
-        </section>
+        </SharedSection>
       ) : null}
     </div>
+  );
+}
+
+function SharedSection({ children }: { children: ReactNode }) {
+  return (
+    <section className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-lg font-semibold tracking-tight flex items-center gap-2">
+          <Users className="size-4 text-muted-foreground" />
+          Shared with me
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Blogs where you hold a publisher cap but not ownership. You can
+          write posts; only the owner can manage members or delete the
+          blog.
+        </p>
+      </div>
+      {children}
+    </section>
   );
 }
 

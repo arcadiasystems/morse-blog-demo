@@ -27,6 +27,7 @@ import { Field } from "@/components/forms/Field";
 import { useTransferOwnership } from "@/hooks/use-cap-mutations";
 import { useDeletePublication } from "@/hooks/use-delete-publication";
 import { useOwnerCap } from "@/hooks/use-owner-cap";
+import { toastPublisherCapUnavailable } from "@/components/feedback/publisher-cap-toast";
 import { usePublisherCap } from "@/hooks/use-publisher-cap";
 import { usePublication } from "@/hooks/use-publication";
 import { useEntries } from "@/hooks/use-entries";
@@ -101,10 +102,10 @@ export function DangerZone({ publicationId }: { publicationId: string }) {
 
   function onDeleteConfirm() {
     if (!cap.data) {
-      toast.error("Missing publisher cap", {
-        description:
-          "Deleting requires removing entries + collections, which needs your PublisherCap.",
-      });
+      toastPublisherCapUnavailable(
+        cap,
+        "Deleting requires removing entries + collections, which needs your PublisherCap.",
+      );
       return;
     }
     del.mutate(

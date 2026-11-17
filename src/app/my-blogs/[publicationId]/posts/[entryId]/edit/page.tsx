@@ -45,6 +45,7 @@ import {
 } from "@/components/ui/tooltip";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
+import { PublisherCapCheckError } from "@/components/feedback/PublisherCapCheckError";
 import { StatusIndicator } from "@/components/feedback/StatusIndicator";
 import { ContentPicker } from "@/components/blog/ContentPicker";
 import { MarkdownEditor } from "@/components/blog/MarkdownEditor";
@@ -224,6 +225,18 @@ export default function EditPostPage({
               ? content.error.message
               : "Unknown error reading entry."
           }
+        />
+      </div>
+    );
+  }
+
+  if (cap.isError) {
+    return (
+      <div className="flex flex-col gap-6 py-4 sm:py-8 max-w-4xl">
+        <BackLink publicationId={publicationId} />
+        <PublisherCapCheckError
+          onRetry={() => cap.refetch()}
+          retrying={cap.isFetching}
         />
       </div>
     );
